@@ -3,7 +3,7 @@ a mall project using reactive architecture
 
 ## Goals
 1. real mall project for production
-2. gain new architecture experience, not only code, but also process of the whole project 
+2. gain new architecture experience, not only code, but also the whole process of the project 
 
 
 ## Architecture 
@@ -25,5 +25,6 @@ TODO
 
 ### Plan
 1. architecture prototype
-1. ddd: event storming and domain story 
+2. ddd: event storming and [domain story](design.md)  
+3. [Bounded contexts](design.md#bounded_contexts) 
 
