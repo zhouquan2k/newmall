@@ -26,5 +26,5 @@ TODO
 ### Plan
 1. architecture prototype
 2. ddd: event storming and [domain story](design.md)  
-3. [Bounded contexts](design.md#bounded_contexts) 
+3. [Bounded contexts](design.md#bounded-contexts) 
 
