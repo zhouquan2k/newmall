@@ -95,6 +95,9 @@ ExportShippingOrders(warehouse,[carrier])
 * find paid orders in specfied time segment for one warehouse
 * generate shipping orders for orders, combine when nessesary (same address)
 
+#### related entities
+* Delivery: warehouse,List
+
 # Bounded Context
 
 
