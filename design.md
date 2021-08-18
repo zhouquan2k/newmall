@@ -111,9 +111,7 @@ sku stock is greater than 0
 * OnShelf:
 #### output entities
 * Order: ... List[PurchaseItem]
-  - PurchaseItem: product,sku,count,warehouse,shelf,
-
-* 
+  - PurchaseItem: product,sku,count,warehouse,shelf, 
 
 ## 5. Delivery
 mall operator export shipping orders for one warehouse.
