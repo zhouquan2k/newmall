@@ -23,6 +23,14 @@ a mall project using reactive architecture
 TODO
 * eventual transaction consistency 
 
+
+* service discovery using pub/sub in message queue  
+
+remove the necessity for the following:
+* webserver/webclient in each microservice, instead of message client
+* api gateway， instead of a message handler to do stuffs about security
+
+
 ### Plan
 1. architecture prototype
 2. ddd: event storming and [domain story](design.md)  
