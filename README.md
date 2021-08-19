@@ -12,7 +12,7 @@ a mall project using reactive architecture
 * domain driven design
 * CQRS style
 
-<img width="1364" alt="WeChat7f931e9da4d1440a2f19ba85757d02fb" src="https://user-images.githubusercontent.com/7393184/129631836-c53fb006-ec45-4d15-b864-3caf57b5fcfe.png">
+<img width="1624" alt="WeChatae6293ae54a998364aab322d3541d916" src="https://user-images.githubusercontent.com/7393184/130106567-d27864a7-dbc6-42e1-ae26-cc96555d7274.png">
 
 
 ### Event Driven Architect:
