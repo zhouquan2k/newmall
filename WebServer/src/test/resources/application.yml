@@ -1,0 +1,11 @@
+
+logging:
+  file:  
+    file: app.log
+    path: ./logs/
+  level:
+    ROOT: INFO
+    com.atusoft:  trace
+    org.springframework: info
+    com.gitee.sunchenbin.mybatis: debug
+    io.vertx.core.impl.BlockedThreadChecker: off
