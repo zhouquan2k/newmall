@@ -13,5 +13,20 @@
 
 ### Rest API
 POST /order
+general data from header such as token,
 
+### Order Service
+* Fundamental layer: 
+  * ServiceFramework: convert message to service method invocation
+  * ServiceFramework: other aspect support: security:current user & permission (Spring security?),log,transaction?
+  * Infrustructure: 
+* service layer: OrderService, 
+* domain layer: Order
+
+### Security Service
+* Authentication & Authroization
+* 
+
+//TODO a architect diagram
+Fundamental -> Service -> Domain 
 
