@@ -1,6 +1,8 @@
 # newmall
 a mall project using reactive architecture 
 
+Event driven achitect, CQRS, Micro service, Domain Driven Develop
+
 ## Goals
 1. real mall project for production
 2. gain new architecture experience, not only code, but also the whole process of the project 
@@ -12,7 +14,8 @@ a mall project using reactive architecture
 * domain driven design
 * CQRS style
 
-<img width="1624" alt="WeChatae6293ae54a998364aab322d3541d916" src="https://user-images.githubusercontent.com/7393184/130106567-d27864a7-dbc6-42e1-ae26-cc96555d7274.png">
+<img width="1534" alt="WeChat762268aa84b3eb4239004ac388562f8f" src="https://user-images.githubusercontent.com/7393184/130392510-5e1b80d4-1310-406f-b431-2d127575289f.png">
+
 
 
 ### Event Driven Architect:
