@@ -1,7 +1,8 @@
 # newmall
 a mall project using reactive architecture 
 
-Event driven achitect, CQRS, Micro service, Domain Driven Develop
+Event driven achitect, Command Query Responsbility Segragation, Micro service, Domain Driven Development
+EDA,CQRS,DDD
 
 ## Goals
 1. real mall project for production
