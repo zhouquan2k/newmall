@@ -68,12 +68,11 @@ public class JsonUtil implements  com.atusoft.util.JsonUtil
 		}
 	}
 	
-	public Object fromJson(String src,Class<?> cls)
+	public <T> T fromJson(String src,Class<T> cls)
 	{
 		try
 		{
 			if (src==null) return null;
-			if (cls==null) return  mapper.readValue(src,Map.class);
 			return this.mapper.readValue(src,cls);
 		}
 		catch (Throwable e)

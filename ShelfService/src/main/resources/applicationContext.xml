@@ -9,8 +9,13 @@
              default-lazy-init="true" >
 
 <context:annotation-config/>
-<bean  class="com.atusoft.messaging.kafka.KafkaMessageContext"/>
+
+<bean  class="com.atusoft.infrastructure.impl.InfrastructureImpl"/>
+<bean class="com.atusoft.infrastructure.impl.ServiceFramework" lazy-init="false"/>
+<bean class="com.atusoft.messaging.kafka.KafkaMessageContext"/>
 <bean class="com.atusoft.json.JsonUtil"/>
-<bean class="com.atusoft.newmall.MallApi" factory-method="apiFactory" lazy-init="false"/>
+
+
+
 
 </beans>

@@ -1,4 +1,4 @@
-package com.atusoft.newmall.order;
+package com.atusoft.newmall.dto.order;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,16 +20,16 @@ public class OrderDTO extends BaseDTO {
 	
 	//product related
 	
-	List<PurchaseItem> purchaseItem;
+	List<PurchaseItem> purchaseItems;
 		
 	public static class PurchaseItem {
 		String productId;
 		String skuId;
+		String shelfId;
 		int count;
 		
 		// for output
 		String warehouseId;
-		String shelfId;
 		BigDecimal unitPrice;	
 	}
 	

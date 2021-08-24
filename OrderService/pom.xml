@@ -47,6 +47,12 @@
 		  
 		</dependency>
 		
+		<dependency>
+		  <groupId>com.atusoft.newmall</groupId>
+		  <artifactId>Mall</artifactId>
+		  <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 	</dependencies>
 
 	<build>

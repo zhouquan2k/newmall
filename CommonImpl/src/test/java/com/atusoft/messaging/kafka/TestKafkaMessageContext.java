@@ -31,17 +31,17 @@ public class TestKafkaMessageContext {
 		responseContext.init();
 		
 		String command="Order";
-		responseContext.setHandler(new String[] {command}, (context,request)->{
-			String str=(String)request;
+		responseContext.setHandler(new String[] {command}, (message)->{
+			String str=(String)message.getContent();
 			String req=str.substring(str.indexOf('>')+1);
-			context.response("<order-response-detail-json>"+req);
+			message.getContext().response("<order-response-detail-json>"+req);
 		});
 		
 		
 		for (int i=0;i<10;i++) {
 			final int index=i;
-			requestContext.request(command, "<order-request-detail-json>"+index, (context,response)->{
-				System.out.println("response recved:"+index+","+response);
+			requestContext.request(command, "<order-request-detail-json>"+index, (msg)->{
+				System.out.println("response recved:"+index+","+msg.getContent());
 				
 			});
 		}
@@ -78,13 +78,13 @@ public class TestKafkaMessageContext {
 		
 		
 		String command="Order2";
-		responseContext.setHandler(new String[] {command}, (context,request)->{
-			CommandMsg msg=(CommandMsg)request;
+		responseContext.setHandler(new String[] {command}, (message)->{
+			CommandMsg msg=(CommandMsg)message.getContent();
 			int index=Integer.parseInt(msg.params.get("index"));
 			CommandMsg response=new CommandMsg(msg.commandName);
 			response.params=Map.of("index",""+index);
 			response.body="<order-response-detail-json>"+index;
-			context.response(response);
+			message.getContext().response(response);
 		});
 		
 		
@@ -93,9 +93,9 @@ public class TestKafkaMessageContext {
 			CommandMsg msg=new CommandMsg(command);
 			msg.params=Map.of("index",""+i);
 			msg.body="<order-request-detail-json>";
-			requestContext.request(command, msg, (context,response)->{
-				System.out.println("response recved:"+index+","+response);	
-				CommandMsg cmsg=(CommandMsg)response;
+			requestContext.request(command, msg, (message)->{
+				System.out.println("response recved:"+index+","+message.getContent());	
+				CommandMsg cmsg=(CommandMsg)message.getContent();
 				assert cmsg.params.get("index").equals(""+index);
 			});
 		}
@@ -120,14 +120,14 @@ public class TestKafkaMessageContext {
 		responseContext.init();
 		
 		
-		String command="OrderCreateOrder";
-		responseContext.setHandler(new String[]{"OrderCreateOrder"}, (context,request)->{
-			CommandMsg msg=(CommandMsg)request;
+		String command="Order.CreateOrder";
+		responseContext.setHandler(new String[]{"Order\\..*"}, (message)->{
+			CommandMsg msg=(CommandMsg)message.getContent();
 			int index=Integer.parseInt(msg.params.get("index"));
 			CommandMsg response=new CommandMsg(msg.commandName);
 			response.params=Map.of("index",""+index);
 			response.body="<order-response-detail-json>"+index;
-			context.response(response);
+			message.getContext().response(response);
 		});
 		
 		
@@ -136,13 +136,52 @@ public class TestKafkaMessageContext {
 			CommandMsg msg=new CommandMsg(command);
 			msg.params=Map.of("index",""+i);
 			msg.body="<order-request-detail-json>";
-			requestContext.request(command, msg, (context,response)->{
-				System.out.println("response recved:"+index+","+response);	
-				CommandMsg cmsg=(CommandMsg)response;
+			requestContext.request(command, msg, (message)->{
+				System.out.println("response recved:"+index+","+message.getContent());	
+				CommandMsg cmsg=(CommandMsg)message.getContent();
 				assert cmsg.params.get("index").equals(""+index);
 			});
 		}
+	}
+	
+	@Test
+	public void testRRwithFuture()  {
+		JsonUtil jsonUtil=new JsonUtil();
 		
+		KafkaMessageContext requestContext=new KafkaMessageContext();
+		requestContext.setNodeId("request_node4");
+		requestContext.setJsonUtil(jsonUtil);
+		requestContext.init();
+		
+		
+		KafkaMessageContext responseContext=new KafkaMessageContext();
+		responseContext.setNodeId("response_node4");
+		requestContext.setJsonUtil(jsonUtil);
+		responseContext.init();
+		
+		
+		String command="Order4";
+		responseContext.setHandler(new String[]{"Order4"}, (message)->{
+			CommandMsg msg=(CommandMsg)message.getContent();
+			int index=Integer.parseInt(msg.params.get("index"));
+			CommandMsg response=new CommandMsg(msg.commandName);
+			response.params=Map.of("index",""+index);
+			response.body="<order-response-detail-json>"+index;
+			message.getContext().response(response);
+		});
+		
+		
+		for (int i=0;i<10;i++) {
+			final int index=i;
+			CommandMsg msg=new CommandMsg(command);
+			msg.params=Map.of("index",""+i);
+			msg.body="<order-request-detail-json>";
+			requestContext.request(command, msg).onSuccess((message)->{
+				System.out.println("response recved:"+index+","+message.getContent());	
+				CommandMsg cmsg=(CommandMsg)message.getContent();
+				assert cmsg.params.get("index").equals(""+index);
+			});
+		}
 	}
 	
 	@AfterAll

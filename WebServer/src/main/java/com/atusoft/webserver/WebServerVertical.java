@@ -30,16 +30,16 @@ class DefaultEntry implements Handler<RoutingContext> {
 	@Override
 	public void handle(RoutingContext routingContext) {
 		// TODO Auto-generated method stub
-		final String commandName="Order.CreateOrder";
+		 final String commandName=this.entry.getCommandName();
 		 ApiMessage command=new ApiMessage(commandName);
 		 command.setParam("_token",routingContext.request().getHeader("Authorization"));
 		 command.setBody(routingContext.getBodyAsString());
-		 messageContext.request(commandName, command, (context,responseMsg)-> {
+		 messageContext.request("Command."+commandName, command, (message)-> {
 			 
 			 HttpServerResponse response = routingContext.response();
 			 response
 			       .putHeader("Content-Type", "text/html")
-			       .end((String)responseMsg);
+			       .end(""+message.getContent());
 			   
 		 });
 	}

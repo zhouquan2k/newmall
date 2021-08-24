@@ -21,7 +21,7 @@ public interface JsonUtil {
 	 * @param src
 	 * @return
 	 */
-	Object fromJson(String src,Class<?> cls);
+	<T> T fromJson(String src,Class<T> cls);
 	
 	Object fromJson(String src,String className);
 	

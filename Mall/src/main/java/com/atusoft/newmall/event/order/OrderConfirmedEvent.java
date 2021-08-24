@@ -1,4 +1,4 @@
-package com.atusoft.newmall.order;
+package com.atusoft.newmall.event.order;
 
 import com.atusoft.infrastructure.BaseEvent;
 
