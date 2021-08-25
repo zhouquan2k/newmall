@@ -75,7 +75,7 @@ Price: price for all levels, origin price to show,freight
 * Stock
 
 #### output entities
-* OnShelf (Status,strategy) : product(pk),state,start_time,end_time,*location*(normal|host list|activity...),List[OnShelfItem]
+* OnShelf (Status,strategy) : product(pk),state,start_time,end_time,*location*(normal|hot list|activity...),List[OnShelfItem]
   * OnShelfItem: sku,on_shelf_count,stock
 * OnShelfHistory (ActionTaken) [optional]
 
@@ -87,17 +87,44 @@ products on shelf at this moment
 * OnShelf
 * Product
 
-## 4. User purchase 
-user purchase product by placing an order,
+
+## 4. User click buy to review order
+may recalculated by adjust the pay options
+
 #### commands:
-CreateOrder(List[PurchaseItem],...)
+Order ReviewOrder(List[PurchaseItem],...)
 
 PurchaseItem: product,sku,count
 
 #### constraints
-product is on shelf 
-onshelf stock is greater than 0
-sku stock is greater than 0
+* product is on shelf 
+* onshelf stock is greater than 0
+* sku stock is greater than 0
+
+#### actions 
+persist order(per user) to remeber what showed to user,especially prices
+calculate prices,including: total price,deductions,shipping price,pay price
+
+#### input entities
+* Stock: product,sku,count,warehouse
+* OnShelf: price info
+* User: brokerage/integral/coupon for deduction
+
+#### output entities
+* Order: user,address,pay method(wechat/balance),deduction method(brokerage/integral),deliver method,List[PurchaseItem]
+  - PurchaseItem: product,sku,count,warehouse,shelf 
+
+#### published events
+* OrderCreated
+  * check stock & onshelf (optional)
+
+#### returns
+Calculated order
+
+## 5. User confirm order 
+user confirm the order
+#### commands:
+ConfirmOrder(orderId)
 
 #### actions 
 * found an warehouse which have enough stock,
@@ -105,15 +132,16 @@ sku stock is greater than 0
 * decease the onshelf stock (OnShelfItem.stock)
 * decrease the stock of the warehouse
 * note: should do reverse operations when order has been canceled
+* wait user 30 min to pay
 
-#### input entities
-* Stock: product,sku,count,warehouse
-* OnShelf:
-#### output entities
-* Order: ... List[PurchaseItem]
-  - PurchaseItem: product,sku,count,warehouse,shelf, 
 
-## 5. Delivery
+#### published events
+* OrderConfirmed
+  * stock & onshelf decrease
+  * user conpon,brokerage,integral dedeuction
+  * reset cart
+
+## 6. Delivery
 mall operator export shipping orders for one warehouse.
 
 #### Commands
@@ -135,6 +163,7 @@ ExportShippingOrders(warehouse,[carrier],isReExport*)
 
 
 # Bounded Contexts
+totally using Object Oriented Methodolodge
 <img width="1306" alt="WeChatae29fbaa41b3968c5c736019fcceab8b" src="https://user-images.githubusercontent.com/7393184/129801677-e01e8fe1-9fc9-4445-a2a2-6488202252d9.png">
 
 

@@ -1,11 +1,8 @@
 # newmall
-a mall project using reactive architecture 
+一个用reactive架构做的电子商场
 
-Event driven achitect, Command Query Responsbility Segragation, Micro service, Domain Driven Development
-EDA,CQRS,DDD
-
-## Goals
-1. real mall project for production
+## 目标
+1. 电子商城
 2. gain new architecture experience, not only code, but also the whole process of the project 
 
 
@@ -15,8 +12,7 @@ EDA,CQRS,DDD
 * domain driven design
 * CQRS style
 
-<img width="1534" alt="WeChat762268aa84b3eb4239004ac388562f8f" src="https://user-images.githubusercontent.com/7393184/130392510-5e1b80d4-1310-406f-b431-2d127575289f.png">
-
+<img width="1624" alt="WeChatae6293ae54a998364aab322d3541d916" src="https://user-images.githubusercontent.com/7393184/130106567-d27864a7-dbc6-42e1-ae26-cc96555d7274.png">
 
 
 ### Event Driven Architect:
@@ -39,4 +35,3 @@ remove the necessity for the following:
 1. architecture prototype
 2. ddd: event storming and [domain story](design.md)  
 3. [Bounded contexts](design.md#bounded-contexts) 
-
