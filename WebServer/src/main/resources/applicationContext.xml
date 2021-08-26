@@ -12,5 +12,5 @@
 <bean  class="com.atusoft.messaging.kafka.KafkaMessageContext"/>
 <bean class="com.atusoft.json.JsonUtil"/>
 <bean class="com.atusoft.newmall.MallApi" factory-method="apiFactory" lazy-init="false"/>
-
+<bean class="io.vertx.core.Vertx" factory-method="vertx"/>
 </beans>

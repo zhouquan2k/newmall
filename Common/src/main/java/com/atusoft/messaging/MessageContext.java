@@ -11,5 +11,5 @@ public interface MessageContext {
 	void response(Object response);
 	
 	void setHandler(String[] topic,MessageHandler handler);
-	void setEventHandler(String[] topic,MessageHandler handler);
+	void setEventHandler(String group,String[] topic,MessageHandler handler);
 }

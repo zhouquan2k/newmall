@@ -32,7 +32,9 @@ class DefaultEntry implements Handler<RoutingContext> {
 		// TODO Auto-generated method stub
 		 final String commandName=this.entry.getCommandName();
 		 ApiMessage command=new ApiMessage(commandName);
-		 command.setParam("_token",routingContext.request().getHeader("Authorization"));
+		 String auth=routingContext.request().getHeader("Authorization");
+		 if (auth!=null&&auth.startsWith("Bearer "))
+			 command.setParam("_token",auth.substring(7));
 		 command.setBody(routingContext.getBodyAsString());
 		 messageContext.request("Command."+commandName, command, (message)-> {
 			 
@@ -48,9 +50,12 @@ class DefaultEntry implements Handler<RoutingContext> {
 @Component
 public class WebServerVertical extends AbstractVerticle  {
 
+	@Autowired
+	Vertx vertx;
+	
 	@PostConstruct
 	public void init() {
-		Vertx vertx = Vertx.vertx();
+		
         vertx.deployVerticle(this);
 	}
 	

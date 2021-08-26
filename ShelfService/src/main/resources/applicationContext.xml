@@ -14,6 +14,10 @@
 <bean class="com.atusoft.infrastructure.impl.ServiceFramework" lazy-init="false"/>
 <bean class="com.atusoft.messaging.kafka.KafkaMessageContext"/>
 <bean class="com.atusoft.json.JsonUtil"/>
+<bean class="com.atusoft.security.SecurityMgr"/>
+<bean class="com.atusoft.redis.RedisUtil"/>
+<bean class="io.vertx.core.Vertx" factory-method="vertx"/>
+
 
 
 

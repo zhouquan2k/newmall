@@ -1,11 +1,10 @@
 package com.atusoft.newmall.order;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
-import com.atusoft.infrastructure.Infrastructure;
+import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
@@ -18,12 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Component("service")
 @Slf4j
-public class OrderService {
-	
-	@Autowired
-	Infrastructure infrastructure;
-	
-	
+public class OrderService extends BaseService {
 	
 	//using dto's base class to get context , or using another param to inject context
 	@CommandHandler
@@ -50,10 +44,14 @@ public class OrderService {
 		if (p!=null) p.complete(event);
 	}
 	
+	
+	
 	@CommandHandler
 	public void ConfirmOrder(String orderId) {
 		
-		Order order=infrastructure.getEntity(Order.class,orderId);
-		order.confirm();
+		infrastructure.getEntity(Order.class,orderId).onComplete(result->{
+			result.result().confirm();
+			//order.confirm();
+		});
 	}
 }

@@ -3,17 +3,23 @@ package com.atusoft.newmall.shelf;
 import java.math.BigDecimal;
 import java.util.Map;
 
-public class ShelfDTO {
+import com.atusoft.infrastructure.BaseDTO;
+import com.atusoft.newmall.dto.user.PromoterLevel;
+
+import lombok.Data;
+
+@Data
+public class ShelfDTO extends BaseDTO {
 	
 	String shelfId;
 
 	String productId;
 	
-	public enum PromoterLevel {
-		Silver,Gold,Diamond,None
-	}
+	Map<String,ShelfItem> sku2Shelf;
 	
-	static class ShelfItem {
+	
+	@Data
+	public static class ShelfItem {
 		
 		String productId;
 		String skuId;

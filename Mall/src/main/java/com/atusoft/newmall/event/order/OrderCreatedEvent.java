@@ -10,9 +10,10 @@ public class OrderCreatedEvent extends BaseEvent {
 	OrderDTO order;
 	
 	protected OrderCreatedEvent() {
-		
+		super(null);
 	}
 	public OrderCreatedEvent(OrderDTO order) {
+		super(order);
 		this.order=order;
 	}
 

@@ -45,6 +45,9 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 	static JsonUtil theJsonUtil;
 	
 	@Autowired
+	Vertx vertx;
+	
+	@Autowired
 	JsonUtil jsonUtil;
 	public void setJsonUtil(JsonUtil j) {
 		this.jsonUtil=j;
@@ -173,7 +176,6 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 	@PostConstruct
 	public void init() {
 		if (theJsonUtil==null) theJsonUtil=jsonUtil;
-		Vertx vertx = Vertx.vertx();
 	    vertx.deployVerticle(this);
 	    	
 		{
@@ -342,14 +344,14 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 
 
 	@Override
-	public void setEventHandler(String[] topic, MessageHandler handler) {
+	public void setEventHandler(String group,String[] topic, MessageHandler handler) {
 		
 		Map<String, String> config = new HashMap<>();
 		config.put("bootstrap.servers", servers);
 		config.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		//config.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 		config.put("value.deserializer", "com.atusoft.messaging.kafka.KafkaMessageContext$JsonDeserializer");
-		config.put("group.id", this.nodeId);
+		config.put("group.id", group);
 		config.put("auto.offset.reset", "earliest");
 		config.put("enable.auto.commit", "true");
 		

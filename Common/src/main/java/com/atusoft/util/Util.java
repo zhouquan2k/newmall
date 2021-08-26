@@ -3,6 +3,8 @@ package com.atusoft.util;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
+import io.vertx.core.CompositeFuture;
+
 public class Util {
 
 	//reflection
@@ -31,5 +33,12 @@ public class Util {
 	
 	public static String getUUID() {
 		return UUID.randomUUID().toString().replace("-","").toLowerCase();
+	}
+	
+	public static <T> T getFutureResult(CompositeFuture cf,Class<T> cls)  {
+		for (Object o:cf.list()) {
+			if (cls.isAssignableFrom(o.getClass())) return (T)o;
+		}
+		throw new RuntimeException("no result of type :"+cls.getName());
 	}
 }

@@ -22,6 +22,7 @@ public class OrderDTO extends BaseDTO {
 	
 	List<PurchaseItem> purchaseItems;
 		
+	@Data
 	public static class PurchaseItem {
 		String productId;
 		String skuId;

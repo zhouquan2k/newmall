@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.atusoft.framwork.ApiMessage;
+import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.Context;
@@ -82,7 +83,7 @@ class ServiceFramework implements MessageHandler {
 			}
 		}
 		
-		context.setEventHandler(topics.toArray(new String[topics.size()]), this);
+		context.setEventHandler(this.serviceName,topics.toArray(new String[topics.size()]), this);
 	}
 
 	@Override
@@ -127,20 +128,24 @@ class ServiceFramework implements MessageHandler {
 		if (method==null) return;
 		Object[] params=new Object[method.getParameterCount()];
 		if (method.getParameterCount()>0) {
-			Class<?> dtoClass=method.getParameterTypes()[0];
-			try {
-				Object dto=jsonUtil.fromJson(command.getBody(),dtoClass);
-				params[0]=dto;
-			}
-			catch (Throwable e)
-			{
-				e.printStackTrace();
-				context.response(e);
-				return;
-			}
-			for (int i=1;i<method.getParameterTypes().length;i++) {
+			Class<?>[] paramTypes=method.getParameterTypes();
+			for (int i=0;i<paramTypes.length;i++) {
 				Class<?> c=method.getParameterTypes()[i];
-				if (c.isAssignableFrom(Context.class)) {
+				if (BaseDTO.class.isAssignableFrom(c)) {
+					try {
+						BaseDTO dto=(BaseDTO)jsonUtil.fromJson(command.getBody(),c);
+						String token=command.getParam("_token");
+						if (token!=null&&token.length()>0) dto.set_token(token);
+						params[i]=dto;
+					}
+					catch (Throwable e)
+					{
+						e.printStackTrace();
+						context.response(e);
+						return;
+					}
+				}
+				else if (Context.class.isAssignableFrom(c)) {
 					params[i]=new ContextImpl(command);
 				}
 			}

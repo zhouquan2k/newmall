@@ -11,9 +11,10 @@ public class OrderDeductionBalancedEvent extends BaseEvent{
 	OrderDTO order;
 	
 	protected OrderDeductionBalancedEvent() {
-		
+		super(null);
 	}
 	public OrderDeductionBalancedEvent(OrderDTO order) {
+		super(order);
 		this.order=order;
 	}
 }

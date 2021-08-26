@@ -6,5 +6,6 @@ public interface User {
 	
 	boolean hasPermission(String[] permissions);
 	
-	<T> T getUserObject(Class<T> cls);//TODO?
+	//<T> T getUserObject(Class<T> cls);//TODO?
+	Object getUserObject();
 }

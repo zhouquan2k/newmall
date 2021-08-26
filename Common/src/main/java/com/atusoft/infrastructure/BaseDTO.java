@@ -8,5 +8,5 @@ public class BaseDTO {
 	//TODO not serializable
 	//Context context;
 	
-	String _token;
+	protected String _token;
 }

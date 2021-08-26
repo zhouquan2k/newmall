@@ -36,7 +36,11 @@
 		 <artifactId>vertx-kafka-client</artifactId>
 		 <version>4.1.2</version>
 		</dependency>
-		
+	<dependency>
+		<groupId>io.vertx</groupId>
+		<artifactId>vertx-redis-client</artifactId>
+		<version>4.1.2</version>
+		</dependency>
 	<dependency>
 		 <groupId>component</groupId>
 		 <artifactId>Common</artifactId>
