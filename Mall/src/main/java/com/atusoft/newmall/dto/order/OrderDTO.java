@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.atusoft.infrastructure.BaseDTO;
-
+import com.atusoft.newmall.dto.user.CouponDTO;
 import lombok.Data;
 
 
-@Data
 //using base class or as another param
+//TODO OrderEx: for output
+
+@Data
 public class OrderDTO extends BaseDTO {
 
 	String orderId; // for output
@@ -45,17 +47,22 @@ public class OrderDTO extends BaseDTO {
 	
 	PayMethod payMethod;
 	
-	boolean doBrokerageDeduction;
-	boolean doIntegralDeduction;
-
-	public class CouponDeduction {
-		String couponId;
-		BigDecimal value; //calculated
+	
+	@Data
+	public static class CouponDeduction extends Deduction {
+		String couponId;//null means no deduction
+		List<CouponDTO> coupons;
 	}
+	
+	Deduction integralDeduction;
+	Deduction brokerageDeduction;
+	CouponDeduction couponDeduction;
 		
 	//deliver related
 	
 	String deliveryPlanId;
+	
+	BigDecimal balance; // for output
 	
 	BigDecimal deliveryPrice; // for output
 	BigDecimal totalPrice; //calculated = sum price of purchase item 

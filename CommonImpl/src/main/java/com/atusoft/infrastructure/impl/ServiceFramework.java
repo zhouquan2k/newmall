@@ -26,7 +26,9 @@ import com.atusoft.messaging.MessageHandler;
 import com.atusoft.util.JsonUtil;
 
 import io.vertx.core.Future;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class ServiceFramework implements MessageHandler {
 	
 	
@@ -113,6 +115,7 @@ class ServiceFramework implements MessageHandler {
 		Object[] params=new Object[1];
 		params[0]=event;
 		try {
+			log.debug("processing event:"+event);
 			method.invoke(service, params);
 		}
 		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -125,7 +128,10 @@ class ServiceFramework implements MessageHandler {
 		ApiMessage command = (ApiMessage)message.getContent();
 		//Method method=Util.getMethod(service.getClass(), command.getCommandName().substring(command.getCommandName().indexOf('.')+1), null);
 		Method method=this.methodMap.get("Command:"+command.getCommandName());
-		if (method==null) return;
+		if (method==null) {
+			log.warn("invalid command:"+command.getCommandName());
+			return;
+		}
 		Object[] params=new Object[method.getParameterCount()];
 		if (method.getParameterCount()>0) {
 			Class<?>[] paramTypes=method.getParameterTypes();
@@ -152,13 +158,22 @@ class ServiceFramework implements MessageHandler {
 		}
 		
 		try {
+			log.debug("// processing command:"+command);
 			Object ret=method.invoke(service, params);
 			if (ret instanceof Future) {
-				((Future<Object>) ret).onComplete( r-> {
-					message.getContext().response(r.result());
+				((Future<Object>) ret).onSuccess( r-> {
+					log.debug("\\\\ command response async:"+r);
+					message.getContext().response(r);
+				}).onFailure(e->{
+					log.debug("\\\\ *** command response async :"+e);
+					e.printStackTrace();
+					message.getContext().response(e);
 				});
 			}
-			else message.getContext().response(ret);
+			else {
+				log.debug("\\\\ command response :"+ret);
+				message.getContext().response(ret);
+			}
 		}  
 		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();

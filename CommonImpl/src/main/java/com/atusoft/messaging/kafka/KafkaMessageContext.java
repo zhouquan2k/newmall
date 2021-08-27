@@ -42,16 +42,17 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 	@Value("${kafka.servers}")
 	final String servers="192.168.1.181:9092";
 	
-	static JsonUtil theJsonUtil;
+	static JsonUtil theJsonUtil; //used by serializer/deserializer
 	
 	@Autowired
-	Vertx vertx;
-	
-	@Autowired
-	JsonUtil jsonUtil;
-	public void setJsonUtil(JsonUtil j) {
-		this.jsonUtil=j;
+	public KafkaMessageContext(JsonUtil jsonUtil,Vertx vertx) {
+		this.jsonUtil=jsonUtil;
+		this.vertx=vertx;
+		if (theJsonUtil==null) theJsonUtil=jsonUtil;
 	}
+	
+	Vertx vertx;
+	JsonUtil jsonUtil;
 	
 
 	static class Request {

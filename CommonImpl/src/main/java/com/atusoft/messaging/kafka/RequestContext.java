@@ -11,6 +11,7 @@ class RequestContext  extends KafkaMessageContext implements MessageContext {
 	Request request;
 	
 	RequestContext(KafkaMessageContext context,Request req) {
+		super(context.jsonUtil,context.vertx);
 		this.nodeId= context.nodeId;
 		this.producer=context.producer;
 		this.requestProducer=context.requestProducer;

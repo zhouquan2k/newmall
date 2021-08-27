@@ -7,27 +7,29 @@ import org.junit.jupiter.api.Test;
 
 import com.atusoft.json.JsonUtil;
 
+import io.vertx.core.Vertx;
+
 
 
 public class TestKafkaMessageContext {
 	
 	static JsonUtil jsonUtil=new JsonUtil();
+	
+	Vertx vertx=Vertx.vertx();
 
 	@Test
 	public void testRequestResponse() {
 		
 		
 		
-		KafkaMessageContext requestContext=new KafkaMessageContext();
+		KafkaMessageContext requestContext=new KafkaMessageContext(jsonUtil,vertx);
 		requestContext.setNodeId("request_node1");
-		requestContext.setJsonUtil(jsonUtil);
 		requestContext.init();
 		
 		
 		
-		KafkaMessageContext responseContext=new KafkaMessageContext();
+		KafkaMessageContext responseContext=new KafkaMessageContext(jsonUtil,vertx);
 		responseContext.setNodeId("response_node1");
-		requestContext.setJsonUtil(jsonUtil);
 		responseContext.init();
 		
 		String command="Order";
@@ -65,15 +67,13 @@ public class TestKafkaMessageContext {
 	public void testRRWithObject()  {
 		JsonUtil jsonUtil=new JsonUtil();
 		
-		KafkaMessageContext requestContext=new KafkaMessageContext();
+		KafkaMessageContext requestContext=new KafkaMessageContext(jsonUtil,vertx);
 		requestContext.setNodeId("request_node2");
-		requestContext.setJsonUtil(jsonUtil);
 		requestContext.init();
 		
 		
-		KafkaMessageContext responseContext=new KafkaMessageContext();
+		KafkaMessageContext responseContext=new KafkaMessageContext(jsonUtil,vertx);
 		responseContext.setNodeId("response_node2");
-		requestContext.setJsonUtil(jsonUtil);
 		responseContext.init();
 		
 		
@@ -108,20 +108,18 @@ public class TestKafkaMessageContext {
 	public void testRRWithTemplate()  {
 		JsonUtil jsonUtil=new JsonUtil();
 		
-		KafkaMessageContext requestContext=new KafkaMessageContext();
+		KafkaMessageContext requestContext=new KafkaMessageContext(jsonUtil,vertx);
 		requestContext.setNodeId("request_node3");
-		requestContext.setJsonUtil(jsonUtil);
 		requestContext.init();
 		
 		
-		KafkaMessageContext responseContext=new KafkaMessageContext();
+		KafkaMessageContext responseContext=new KafkaMessageContext(jsonUtil,vertx);
 		responseContext.setNodeId("response_node3");
-		requestContext.setJsonUtil(jsonUtil);
 		responseContext.init();
 		
 		
-		String command="Order.CreateOrder";
-		responseContext.setHandler(new String[]{"Order\\..*"}, (message)->{
+		String command="TestOrder.CreateOrder";
+		responseContext.setHandler(new String[]{"TestOrder\\..*"}, (message)->{
 			CommandMsg msg=(CommandMsg)message.getContent();
 			int index=Integer.parseInt(msg.params.get("index"));
 			CommandMsg response=new CommandMsg(msg.commandName);
@@ -148,15 +146,13 @@ public class TestKafkaMessageContext {
 	public void testRRwithFuture()  {
 		JsonUtil jsonUtil=new JsonUtil();
 		
-		KafkaMessageContext requestContext=new KafkaMessageContext();
+		KafkaMessageContext requestContext=new KafkaMessageContext(jsonUtil,vertx);
 		requestContext.setNodeId("request_node4");
-		requestContext.setJsonUtil(jsonUtil);
 		requestContext.init();
 		
 		
-		KafkaMessageContext responseContext=new KafkaMessageContext();
+		KafkaMessageContext responseContext=new KafkaMessageContext(jsonUtil,vertx);
 		responseContext.setNodeId("response_node4");
-		requestContext.setJsonUtil(jsonUtil);
 		responseContext.init();
 		
 		

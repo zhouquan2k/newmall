@@ -32,14 +32,12 @@ public class OrderService extends BaseService {
 	
 	@EventHandler
 	public void onOrderPricedEvent(OrderPricedEvent event) {
-		log.debug("recved priced event");
 		Promise<OrderPricedEvent> p=(Promise<OrderPricedEvent>)this.infrastructure.getPendingFuture("order:"+event.getOrder().getOrderId()+":price");
 		if (p!=null) p.complete(event);
 	}
 	
 	@EventHandler
 	public void onOrderDeductionBalancedEvent(OrderDeductionBalancedEvent event) {
-		log.debug("recved deduction event");
 		Promise<OrderDeductionBalancedEvent> p=(Promise<OrderDeductionBalancedEvent>)this.infrastructure.getPendingFuture("order:"+event.getOrder().getOrderId()+":deduction");
 		if (p!=null) p.complete(event);
 	}

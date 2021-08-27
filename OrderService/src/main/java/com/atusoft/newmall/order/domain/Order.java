@@ -9,12 +9,15 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.Infrastructure;
 import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.order.OrderDTO;
+import com.atusoft.newmall.dto.order.OrderDTO.PayMethod;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
+import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 import com.atusoft.util.Util;
 
 import io.vertx.core.CompositeFuture;
@@ -25,10 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class Order   {
-	
-	@Autowired
-	Infrastructure infrastructure;
+public class Order  extends BaseEntity {
 	
 	final OrderDTO order;
 	
@@ -48,9 +48,9 @@ public class Order   {
 		Promise<?> pPriced=this.infrastructure.addPendingFuture("order:"+this.order.getOrderId()+":price");
 		Promise<?> pDeduction=this.infrastructure.addPendingFuture("order:"+this.order.getOrderId()+":deduction");
 		
-		fUser.onSuccess(user->{
+		Util.onSuccess(fUser,user->{
 			this.order.setUserId(user.getUserId());
-			this.infrastructure.persistEntity(this.order.getOrderId(),order, 60*10);
+			this.infrastructure.persistEntity(this.order.getOrderId(),this, 60*10);
 			this.infrastructure.publishEvent(new OrderCreatedEvent(this.order));
 		});
 		
@@ -69,8 +69,20 @@ public class Order   {
 				map( pi -> pi.getUnitPrice().multiply(new BigDecimal(""+pi.getCount())) );
 			BigDecimal total=s.reduce(BigDecimal::add).get();
 			this.order.setTotalPrice(total);
+			
+			
+			OrderDeductionBalancedEvent de=Util.getFutureResult(cf, OrderDeductionBalancedEvent.class);
+			BigDecimal deduction=BigDecimal.ZERO;
+			if (order.getBrokerageDeduction()!=null&&order.getBrokerageDeduction().isDeduction()) {	
+				order.getBrokerageDeduction().setDeducted(de.getOrder().getBrokerageDeduction().getBalance().min(total));
+				total=total.subtract(order.getBrokerageDeduction().getDeducted());
+				deduction=deduction.add(order.getBrokerageDeduction().getDeducted());
+			}
+			this.order.setBalance(de.getOrder().getBalance());
 			//TODO
+			
 			this.order.setPayPrice(total);
+			this.order.setDeductionPrice(deduction);
 			
 			//do calculations
 			log.debug("order calculated."+total);

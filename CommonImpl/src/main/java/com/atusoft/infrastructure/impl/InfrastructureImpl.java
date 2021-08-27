@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
 import com.atusoft.infrastructure.BaseDTO;
+import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.Infrastructure;
 import com.atusoft.infrastructure.User;
@@ -26,7 +27,9 @@ import com.atusoft.util.Util;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.redis.client.Response;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class InfrastructureImpl implements Infrastructure  {
 
 	@Autowired
@@ -68,28 +71,40 @@ class InfrastructureImpl implements Infrastructure  {
 	
 	@Override
 	public <T> Future<T> getEntity(Class<T> cls, String key) {
+		if (cls!=null) key=cls.getSimpleName()+":"+key;
 		return this.redisUtil.getRedis().get(key).map(response->{
 			if (response==null) return null;
 			String str=response.toString();
 			String className=str.substring(0,str.indexOf(':'));
 			String content=str.substring(str.indexOf(':')+1);
-			if (cls==Object.class)
-				return (T)this.jsonUtil.fromJson(content,className);
+			T ret=null;
+			if (cls==null)
+				ret=(T)this.jsonUtil.fromJson(content,className);
 			else
-				return this.jsonUtil.fromJson(content,cls);
+				ret=this.jsonUtil.fromJson(content,cls);
+			if (ret instanceof BaseEntity) ((BaseEntity)ret).setInfrastructure(this);
+			return ret;
 		});
 	}
 	
 
 	@Override
-	public <T> T newEntity(Class<T> cls, BaseDTO dto) {
-		return appCtx.getBean(cls, dto);
+	public <T extends BaseEntity> T newEntity(Class<T> cls, BaseDTO dto) {
+		try {
+			T ret=cls.getConstructor(dto.getClass()).newInstance(dto);
+			ret.setInfrastructure(this);
+			return ret;
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 
 	@Override
 	public <T> Future<T> persistEntity(String key,T entity, int timeoutInSeconds) {
 		Future<Response> ret=null;
+		if (key.indexOf(':')<0) key=entity.getClass().getSimpleName()+":"+key;
 		List<String> params=new Vector<String>(Arrays.asList(key,entity.getClass().getName()+":"+this.jsonUtil.toJson(entity)));
 		if (timeoutInSeconds>0) {
 			params.add("EX");
@@ -103,6 +118,7 @@ class InfrastructureImpl implements Infrastructure  {
 
 	@Override
 	public void publishEvent(BaseEvent event) {
+		log.debug("publishing event:"+event);
 		this.messageContext.publish("Event."+event.getClass().getName(),event);
 	}
 

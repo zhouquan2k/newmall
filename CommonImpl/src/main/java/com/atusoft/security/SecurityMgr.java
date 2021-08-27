@@ -17,7 +17,7 @@ public class SecurityMgr implements SecurityUtil {
 	@Override
 	public void loginByEvent(String token,Object user) {		
 		String key="user_token:"+token;
-		this.infrastructure.getEntity(Object.class,key).onSuccess( r->{
+		this.infrastructure.getEntity(null,key).onSuccess( r->{
 			if (r==null) infrastructure.persistEntity(key,user,0); 
 		});
 	}
@@ -25,7 +25,7 @@ public class SecurityMgr implements SecurityUtil {
 	@Override
 	public Future<User> getCurrentUser(String token) {
 		String key="user_token:"+token;
-		return this.infrastructure.getEntity(Object.class,key).map( r->{
+		return this.infrastructure.getEntity(null,key).map( r->{
 			UserObject uo=(UserObject)r;
 			return uo==null?null:uo.getUser();
 			//TODO

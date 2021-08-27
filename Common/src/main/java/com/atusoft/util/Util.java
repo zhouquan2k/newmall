@@ -1,12 +1,18 @@
 package com.atusoft.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
 import io.vertx.core.CompositeFuture;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Util {
-
+	
 	//reflection
 	//TODO should tune, make a method map
 	//find method by name, by param count if provided
@@ -40,5 +46,22 @@ public class Util {
 			if (cls.isAssignableFrom(o.getClass())) return (T)o;
 		}
 		throw new RuntimeException("no result of type :"+cls.getName());
+	}
+	
+	public static <T> Future<T> onSuccess(Future<T>f,Handler<T> handler) {
+		return f.onSuccess(handler).onFailure(exception->{
+			log.error(getErrStack(exception,0,0));
+		});
+	}
+	
+	
+	public static String getErrStack(Throwable exception ,int maxLine,int maxLength) //throws Throwable
+	{
+		ByteArrayOutputStream stream0 = new ByteArrayOutputStream();
+		PrintStream stream = new PrintStream(stream0);
+		exception.printStackTrace(stream);
+		String ret = stream0.toString();
+		return(maxLength <= 0)? ret: ((ret.length() > maxLength) ? ret.substring(0, maxLength) : ret);
+		
 	}
 }

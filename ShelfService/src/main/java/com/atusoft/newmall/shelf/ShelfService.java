@@ -48,10 +48,6 @@ public class ShelfService extends BaseService {
 			
 		});
 		
-		
-		
-		
-		this.infrastructure.publishEvent(new OrderDeductionBalancedEvent(event.getOrder()));
 	}
 	
 	
