@@ -4,17 +4,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.atusoft.infrastructure.BaseEntity;
-import com.atusoft.infrastructure.Infrastructure;
 import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.order.OrderDTO;
-import com.atusoft.newmall.dto.order.OrderDTO.PayMethod;
-import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;

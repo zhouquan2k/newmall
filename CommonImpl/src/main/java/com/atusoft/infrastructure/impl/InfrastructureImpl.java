@@ -1,10 +1,7 @@
 package com.atusoft.infrastructure.impl;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 import javax.annotation.PostConstruct;
 
@@ -16,22 +13,24 @@ import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.Infrastructure;
+import com.atusoft.infrastructure.PersistUtil;
 import com.atusoft.infrastructure.User;
 import com.atusoft.messaging.Message;
 import com.atusoft.messaging.MessageContext;
-import com.atusoft.redis.RedisUtil;
 import com.atusoft.util.JsonUtil;
 import com.atusoft.util.SecurityUtil;
 import com.atusoft.util.Util;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.redis.client.Response;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class InfrastructureImpl implements Infrastructure  {
+public class InfrastructureImpl implements Infrastructure  {
 
+	@Autowired
+	PersistUtil persistUtil;
+	
 	@Autowired
 	MessageContext messageContext;
 	
@@ -45,10 +44,8 @@ class InfrastructureImpl implements Infrastructure  {
 	ApplicationContext appCtx;
 	
 	@Autowired
-	SecurityUtil securityUtil;
+	protected SecurityUtil securityUtil;
 	
-	@Autowired 
-	RedisUtil redisUtil;
 	
 	Map<String,Promise<?>> allPendingFutures=new HashMap<String,Promise<?>>();
 	
@@ -71,20 +68,7 @@ class InfrastructureImpl implements Infrastructure  {
 	
 	@Override
 	public <T> Future<T> getEntity(Class<T> cls, String key) {
-		if (cls!=null) key=cls.getSimpleName()+":"+key;
-		return this.redisUtil.getRedis().get(key).map(response->{
-			if (response==null) return null;
-			String str=response.toString();
-			String className=str.substring(0,str.indexOf(':'));
-			String content=str.substring(str.indexOf(':')+1);
-			T ret=null;
-			if (cls==null)
-				ret=(T)this.jsonUtil.fromJson(content,className);
-			else
-				ret=this.jsonUtil.fromJson(content,cls);
-			if (ret instanceof BaseEntity) ((BaseEntity)ret).setInfrastructure(this);
-			return ret;
-		});
+		return this.persistUtil.getEntity(cls, key);
 	}
 	
 
@@ -103,17 +87,11 @@ class InfrastructureImpl implements Infrastructure  {
 
 	@Override
 	public <T> Future<T> persistEntity(String key,T entity, int timeoutInSeconds) {
-		Future<Response> ret=null;
-		if (key.indexOf(':')<0) key=entity.getClass().getSimpleName()+":"+key;
-		List<String> params=new Vector<String>(Arrays.asList(key,entity.getClass().getName()+":"+this.jsonUtil.toJson(entity)));
-		if (timeoutInSeconds>0) {
-			params.add("EX");
-			params.add(""+timeoutInSeconds);
-		}
-		ret=this.redisUtil.getRedis().set(params).onFailure(e->{
-			e.printStackTrace();
+		final Infrastructure that=this;
+		return this.persistUtil.persistEntity(key,entity,timeoutInSeconds).map(ret->{
+			if (ret instanceof BaseEntity) ((BaseEntity)ret).setInfrastructure(that);
+			return ret;
 		});
-		return ret.map(r->(T)r);
 	}
 
 	@Override
