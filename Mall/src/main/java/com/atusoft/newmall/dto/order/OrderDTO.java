@@ -20,6 +20,16 @@ public class OrderDTO extends BaseDTO {
 	String userId; // for output
 	String addressId;
 	
+	public enum Status {
+		Preview,Submited,Cancelled,Paid,Delivering,Delivered,Accepted,Evaluated,
+	}
+	public enum RefundStatus {
+		Applying,Refunded,Rejected,None
+	}
+	
+	Status status;
+	RefundStatus refundStatus;
+	
 	//product related
 	
 	List<PurchaseItem> purchaseItems;

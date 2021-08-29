@@ -26,6 +26,7 @@ public class ShelfDTO extends BaseDTO {
 		
 		BigDecimal originPrice;
 		Map<PromoterLevel,BigDecimal> promoterPrices;	
-
+		
+		int stock;
 	}
 }

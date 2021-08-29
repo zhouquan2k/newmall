@@ -14,6 +14,7 @@ import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 
@@ -52,9 +53,14 @@ public class ShelfService extends BaseService {
 	
 	
 	@CommandHandler
-	public void SaveShelf(ShelfDTO shelf) {
+	public Future<ShelfDTO> SaveShelf(ShelfDTO shelf) {
 		Shelf entity=this.infrastructure.newEntity(Shelf.class, shelf);
-		entity.save();
+		return entity.save();
+	}
+	
+	@EventHandler
+	public void onOrderSubmitedEvent(OrderSubmitedEvent event) {
+		
 	}
 	
 }

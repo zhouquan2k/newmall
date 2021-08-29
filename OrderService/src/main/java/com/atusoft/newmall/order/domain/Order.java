@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.order.OrderDTO;
+import com.atusoft.newmall.dto.order.OrderDTO.Status;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 import com.atusoft.util.Util;
@@ -84,24 +86,15 @@ public class Order  extends BaseEntity {
 			log.debug("order calculated."+total);
 			return order;
 		});
-			
-		
-		
-		
-		/*
-		 RPC call other service
-		Future<List<ShelfDTO>> fPrices=this.shelfService.getPrices(this.order.getPurchaseItems());
-		fPrices.onSuccess((list)->{
-			for (ShelfDTO shelf:list) {
-				log.info(this.infrastructure.toJson(shelf));
-			}
-		});
-		*/
 	}
 	
+	public OrderDTO getOrder() {
+		return this.order;
+	}
 	
-	
-	public void confirm() {
-		this.infrastructure.publishEvent(new OrderCreatedEvent(this.order));
+
+	public void submit() {
+		this.order.setStatus(Status.Submited);
+		this.infrastructure.publishEvent(new OrderSubmitedEvent(this.order));
 	}
 }

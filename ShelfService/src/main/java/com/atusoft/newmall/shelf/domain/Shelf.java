@@ -7,6 +7,8 @@ import com.atusoft.newmall.dto.user.UserDTO;
 import com.atusoft.newmall.shelf.ShelfDTO;
 import com.atusoft.newmall.shelf.ShelfDTO.ShelfItem;
 
+import io.vertx.core.Future;
+
 public class Shelf extends BaseEntity {
 	
 
@@ -33,7 +35,9 @@ public class Shelf extends BaseEntity {
 		return item;
 	}
 	
-	public void save() {
-		this.infrastructure.persistEntity(this.shelf.getShelfId(), this, 0);
+	public Future<ShelfDTO> save() {
+		return this.infrastructure.persistEntity(this.shelf.getShelfId(), this, 0).map(r->{
+			return r.getShelf();
+		});
 	}
 }

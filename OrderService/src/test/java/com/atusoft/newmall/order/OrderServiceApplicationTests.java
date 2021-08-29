@@ -8,44 +8,31 @@ import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
-import org.springframework.context.annotation.Scope;
-import org.springframework.test.context.ActiveProfiles;
 
-import com.atusoft.infrastructure.Infrastructure;
-import com.atusoft.infrastructure.PersistUtil;
+import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.order.Deduction;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
-import com.atusoft.newmall.dto.user.PromoterLevel;
-import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderExceptionEvent;
+import com.atusoft.newmall.event.order.OrderExceptionEvent.Cause;
+import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 import com.atusoft.newmall.event.user.UserLoginEvent;
+import com.atusoft.newmall.order.domain.Order;
 import com.atusoft.test.BaseTest;
-import com.atusoft.test.Infrastructure4Test;
-import com.atusoft.test.MyTestConfiguration;
-import com.atusoft.test.TestPersistUtil;
 
 import io.vertx.core.Future;
-import lombok.extern.slf4j.Slf4j;;
 
-@SpringBootTest
-@ActiveProfiles("test")
-@Import(MyTestConfiguration.class)
-@Slf4j
 class OrderServiceApplicationTests extends BaseTest {
-	
-	
 		
 	@Autowired
 	OrderService orderService;
+	
+	static String orderId;
+	static BaseEvent lastEvent;
 	
 	
 	@BeforeEach
@@ -59,30 +46,35 @@ class OrderServiceApplicationTests extends BaseTest {
 	}
 	
 	@Test
+	@org.junit.jupiter.api.Order(1)
 	public void testLogin() {
+		
 		String json="{userId:\"27\",user:{userId:\"27\",username:\"zhouquan\",promoterLevel:\"Silver\"},_token:\"token_1\"}";
 		System.out.println(json);
 		UserLoginEvent event=this.jsonUtil.fromJson(json,UserLoginEvent.class);
 		orderService.onUserLoginEvent(event);
 		OrderDTO dto=this.jsonUtil.fromJson("{\"userId\":27,purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}],brokerageDeduction:{deduction: false},_token:\"token_1\"}", OrderDTO.class);
-		assertEquals(this.infrastructure.getCurrentUser(dto).result().getUserId(),"27");
+		assertEquals(infrastructure.getCurrentUser(dto).result().getUserId(),"27");
 	}
 	
 	@Test 
+	@org.junit.jupiter.api.Order(2)
 	public void testPreview() throws InterruptedException {
 		
+		/*
 		UserDTO user=new UserDTO();
 		user.setNickname("zhouquan");
 		user.setPromoterLevel(PromoterLevel.Silver);
 		user.setUserId("27");
 		this.infrastructure.persistEntity("user_token:token_1", user, 0);
+		*/
 		
 		OrderDTO dto=this.jsonUtil.fromJson("{\"userId\":27,purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}],brokerageDeduction:{deduction: false},_token:\"token_1\"}", OrderDTO.class);
 		Future<OrderDTO> future=orderService.PreviewOrder(dto); 
-		Thread.sleep(50);
+		Thread.sleep(20);
 		OrderCreatedEvent event=infrastructure.assureEvent(OrderCreatedEvent.class);
 		assertTrue(event!=null);
-		String orderId=event.getOrder().getOrderId();
+		this.orderId=event.getOrder().getOrderId();
 		dto.setOrderId(orderId);
 		
 		//assert event/response/repository
@@ -104,5 +96,32 @@ class OrderServiceApplicationTests extends BaseTest {
 				
 		
 	}
+	
+	@Test
+	@org.junit.jupiter.api.Order(3)
+	public void testPurchase() throws InterruptedException {
+		//Future<?> ret=
+		orderService.SubmitOrder(orderId);
+		OrderSubmitedEvent event=infrastructure.assureEvent(OrderSubmitedEvent.class);
+		assertTrue(event!=null);
+		lastEvent=event;
+		Order order=this.infrastructure.getEntity(Order.class, orderId).result();
+		assertEquals(order.getOrder().getStatus(),OrderDTO.Status.Submited);
+	}
+	
+	@Test
+	@org.junit.jupiter.api.Order(4)
+	public void testCancelEvent() throws InterruptedException {
+		//Future<?> ret=
+		OrderExceptionEvent exception=new OrderExceptionEvent(lastEvent,Cause.ShelfOutOfStock,"Shelf OutOfStock");
+		orderService.onOrderExceptionEvent(exception);
+		
+		OrderCancelledEvent event=infrastructure.assureEvent(OrderCancelledEvent.class);
+		assertTrue(event!=null);
+		Order order=this.infrastructure.getEntity(Order.class, orderId).result();
+		assertEquals(order.getOrder().getStatus(),OrderDTO.Status.Cancelled);
+		
+	}
+	
 
 }

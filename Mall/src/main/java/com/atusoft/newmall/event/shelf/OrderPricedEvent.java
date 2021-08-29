@@ -13,7 +13,6 @@ public class OrderPricedEvent extends BaseEvent {
 	OrderDTO order;
 	
 	protected OrderPricedEvent() {
-		super(null);
 	}
 	public OrderPricedEvent(OrderDTO order) {
 		super(order);

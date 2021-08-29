@@ -6,9 +6,11 @@ import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
 import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
+import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 import com.atusoft.newmall.order.domain.Order;
+import com.atusoft.util.Util;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -42,14 +44,18 @@ public class OrderService extends BaseService {
 		if (p!=null) p.complete(event);
 	}
 	
+	@EventHandler
+	public void onOrderExceptionEvent(OrderExceptionEvent event) {
+		//TODO
+	}
+	
 	
 	
 	@CommandHandler
-	public void ConfirmOrder(String orderId) {
+	public void SubmitOrder(String orderId) {
 		
-		infrastructure.getEntity(Order.class,orderId).onComplete(result->{
-			result.result().confirm();
-			//order.confirm();
+		Util.onSuccess(this.infrastructure.getEntity(Order.class,orderId),order->{
+			order.submit();
 		});
 	}
 }

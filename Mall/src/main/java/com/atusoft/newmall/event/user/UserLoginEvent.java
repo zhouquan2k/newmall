@@ -13,7 +13,6 @@ public class UserLoginEvent extends BaseEvent {
 	UserDTO user;
 	
 	protected UserLoginEvent() {
-		super(null);
 	}
 	
 	public UserLoginEvent(UserDTO user) {

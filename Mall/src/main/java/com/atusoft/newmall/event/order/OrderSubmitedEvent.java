@@ -3,17 +3,16 @@ package com.atusoft.newmall.event.order;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.order.OrderDTO;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class OrderCreatedEvent extends BaseEvent {
+@Getter
+public class OrderSubmitedEvent extends BaseEvent {
 	OrderDTO order;
 	
-	protected OrderCreatedEvent() {
+	protected OrderSubmitedEvent() {
 	}
-	public OrderCreatedEvent(OrderDTO order) {
+	public OrderSubmitedEvent(OrderDTO order) {
 		super(order);
 		this.order=order;
 	}
-
 }

@@ -4,9 +4,8 @@ import lombok.Data;
 
 @Data
 public class BaseDTO {
-
-	//TODO not serializable
-	//Context context;
 	
 	protected String _token;
+	
+	protected String _serial; //business serial
 }
