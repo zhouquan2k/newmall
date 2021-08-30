@@ -16,3 +16,4 @@ logging:
     org.springframework: info
     com.gitee.sunchenbin.mybatis: debug
     io.vertx.core.impl.BlockedThreadChecker: off
+    org.apache.kafka:  warn

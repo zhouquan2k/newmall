@@ -6,7 +6,7 @@ import org.springframework.context.annotation.ImportResource;
 
 
 @SpringBootApplication
-@ImportResource({"classpath*:applicationContext.xml"})
+@ImportResource({"classpath*:webserver-applicationContext.xml"})
 //@ComponentScan({"com.atusoft"})
 public class WebServerApplication {
 

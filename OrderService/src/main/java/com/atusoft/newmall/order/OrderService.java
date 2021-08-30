@@ -52,10 +52,12 @@ public class OrderService extends BaseService {
 	
 	
 	@CommandHandler
-	public void SubmitOrder(String orderId) {
+	public Future<?> SubmitOrder(String orderId) {
 		
-		Util.onSuccess(this.infrastructure.getEntity(Order.class,orderId),order->{
+		return Util.onSuccess(this.infrastructure.getEntity(Order.class,orderId),order->{
+			Util.mustNotNull(order);
 			order.submit();
+			return Future.succeededFuture();
 		});
 	}
 }

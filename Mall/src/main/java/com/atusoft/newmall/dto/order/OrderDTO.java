@@ -1,6 +1,7 @@
 package com.atusoft.newmall.dto.order;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.atusoft.infrastructure.BaseDTO;
@@ -79,4 +80,5 @@ public class OrderDTO extends BaseDTO {
 	BigDecimal payPrice; //calculated = totalPrice - deduction
 	BigDecimal deductionPrice; //calculated = BrokerageDeduction+IntegralDeduction+CouponDeduction
 	
+	LocalDateTime submitTime;
 }

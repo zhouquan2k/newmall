@@ -1,9 +1,11 @@
 package com.atusoft.newmall.user;
 
+import java.math.BigDecimal;
+
 import com.atusoft.infrastructure.BaseEntity;
-import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.util.BusiException;
 
 
 public class User extends BaseEntity {
@@ -23,20 +25,32 @@ public class User extends BaseEntity {
 		this.account=account; //TODO copy;
 		this.save();
 	}
+		
+	//account
+	//TODO can't reuse in domain, move to service?, not depending on order
+	/*
+	public void getOrderBalance(OrderDTO order) {
+				
+	}
+	*/
 	
-	public void save() {
-		this.infrastructure.persistEntity(this.user.getUserId(), this, 0);
+	public void deductBrokerage(BigDecimal deduction) {
+		if (this.account.getBrokerage().compareTo(deduction)<0) 
+			throw new BusiException("BrokerageDeductionFail","BrokerageDeductionFail","User");
+		this.account.setBrokerage(account.getBrokerage().subtract(deduction));
+		this.save();
 	}
 	
-	//account
-	public void getOrderBalance(OrderDTO order) {
-		order.setBalance(this.account.getBalance());
-		if (order.getBrokerageDeduction()!=null) 
-			order.getBrokerageDeduction().setBalance(this.account.getBrokerage());
-		if (order.getIntegralDeduction()!=null) 
-			order.getIntegralDeduction().setBalance(this.account.getIntegral());
-		if (order.getCouponDeduction()!=null)
-			order.getCouponDeduction().setCoupons(this.account.getCoupons());
-		
+	UserDTO getUser() {
+		return user;
+	}
+	
+	AccountDTO getAccount() {
+		return account;
+	}
+
+	@Override
+	public String getId() {
+		return this.user.getUserId();
 	}
 }

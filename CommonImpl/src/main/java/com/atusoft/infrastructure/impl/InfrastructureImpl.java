@@ -68,7 +68,12 @@ public class InfrastructureImpl implements Infrastructure  {
 	
 	@Override
 	public <T> Future<T> getEntity(Class<T> cls, String key) {
-		return this.persistUtil.getEntity(cls, key);
+		
+		return this.persistUtil.getEntity(cls, key).compose(t->{
+			if (t!=null&&BaseEntity.class.isAssignableFrom(cls))
+				((BaseEntity)t).setInfrastructure(this);
+			return Future.succeededFuture(t);		
+		});
 	}
 	
 

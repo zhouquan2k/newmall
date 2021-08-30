@@ -6,6 +6,7 @@ import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.dto.user.UserDTO;
 import com.atusoft.newmall.shelf.ShelfDTO;
 import com.atusoft.newmall.shelf.ShelfDTO.ShelfItem;
+import com.atusoft.util.BusiException;
 
 import io.vertx.core.Future;
 
@@ -39,5 +40,18 @@ public class Shelf extends BaseEntity {
 		return this.infrastructure.persistEntity(this.shelf.getShelfId(), this, 0).map(r->{
 			return r.getShelf();
 		});
+	}
+	
+	public Future<ShelfDTO> purchase(PurchaseItem item) {
+		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(item.getSkuId());
+		if (shelfItem.getStock()<item.getCount())
+			throw new BusiException("ShelfOutOfStock","ShelfOutOfStock","Shelf");
+		shelfItem.setStock(shelfItem.getStock()-item.getCount());
+		return this.save();
+	}
+
+	@Override
+	public String getId() {
+		return this.shelf.getShelfId();
 	}
 }

@@ -2,6 +2,7 @@ package com.atusoft.infrastructure.impl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,6 +136,7 @@ class ServiceFramework implements MessageHandler {
 		Object[] params=new Object[method.getParameterCount()];
 		if (method.getParameterCount()>0) {
 			Class<?>[] paramTypes=method.getParameterTypes();
+			Parameter[] parameters=method.getParameters();
 			for (int i=0;i<paramTypes.length;i++) {
 				Class<?> c=method.getParameterTypes()[i];
 				if (BaseDTO.class.isAssignableFrom(c)) {
@@ -154,6 +156,12 @@ class ServiceFramework implements MessageHandler {
 				else if (Context.class.isAssignableFrom(c)) {
 					params[i]=new ContextImpl(command);
 				}
+				else {
+					if (command.getParams().containsKey(parameters[i].getName())) {
+						params[i]=convertFromString(command.getParam(parameters[i].getName()),
+								parameters[i].getType());
+					}
+				}
 			}
 		}
 		
@@ -161,7 +169,7 @@ class ServiceFramework implements MessageHandler {
 			log.debug("// processing command:"+command);
 			Object ret=method.invoke(service, params);
 			if (ret instanceof Future) {
-				((Future<Object>) ret).onSuccess( r-> {
+				((Future<?>) ret).onSuccess( r-> {
 					log.debug("\\\\ command response async:"+r);
 					message.getContext().response(r);
 				}).onFailure(e->{
@@ -180,5 +188,16 @@ class ServiceFramework implements MessageHandler {
 			message.getContext().response(e);
 		}	
 		
+	}
+	
+	private <T> T convertFromString(String src,Class<T> cls) {
+		if (cls.isPrimitive()) {
+			if (cls.equals(java.lang.Integer.TYPE))
+				return (T)(Object)Integer.parseInt(src);
+		}
+		else if (cls.equals(String.class))
+			return (T)src;
+		return null;
+		//TODO
 	}
 }

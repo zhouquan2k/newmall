@@ -8,6 +8,7 @@ import com.atusoft.framwork.ApiMessage;
 import com.atusoft.infrastructure.RestApi;
 import com.atusoft.infrastructure.RestApi.ApiEntry;
 import com.atusoft.messaging.MessageContext;
+import com.atusoft.util.JsonUtil;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -22,9 +23,11 @@ import io.vertx.ext.web.handler.BodyHandler;
 class DefaultEntry implements Handler<RoutingContext> {
 	ApiEntry entry;
 	MessageContext messageContext;
-	DefaultEntry(ApiEntry entry,MessageContext messageContext) {
+	JsonUtil jsonUtil;
+	DefaultEntry(ApiEntry entry,MessageContext messageContext,JsonUtil jsonUtil) {
 		this.entry=entry;
 		this.messageContext=messageContext;
+		this.jsonUtil=jsonUtil;
 	}
 	
 	@Override
@@ -35,13 +38,19 @@ class DefaultEntry implements Handler<RoutingContext> {
 		 String auth=routingContext.request().getHeader("Authorization");
 		 if (auth!=null&&auth.startsWith("Bearer "))
 			 command.setParam("_token",auth.substring(7));
+		 
+		 routingContext.pathParams().entrySet().stream().forEach(e->{
+			 command.setParam(e.getKey(), e.getValue());
+		 });
+		 
 		 command.setBody(routingContext.getBodyAsString());
 		 messageContext.request("Command."+commandName, command, (message)-> {
 			 
+			 //TODO to json string
 			 HttpServerResponse response = routingContext.response();
 			 response
-			       .putHeader("Content-Type", "text/html")
-			       .end(""+message.getContent());
+			       .putHeader("Content-Type", "application/json")
+			       .end(""+((message.getContent()!=null)?jsonUtil.toJson(message.getContent()):""));
 			   
 		 });
 	}
@@ -65,6 +74,9 @@ public class WebServerVertical extends AbstractVerticle  {
 	@Autowired 
 	RestApi restApi;
 	
+	@Autowired
+	JsonUtil jsonUtil;
+	
 	@Override
 	public void start(Promise<Void> fut) {
 	 // 创建一个router对象。
@@ -85,7 +97,7 @@ public class WebServerVertical extends AbstractVerticle  {
 		 switch (entry.getMethod()) {
 		 case POST:
 			 router.post(entry.getPath()).handler(BodyHandler.create())
-			 	.handler(new DefaultEntry(entry,this.messageContext));
+			 	.handler(new DefaultEntry(entry,this.messageContext,jsonUtil));
 			 break;
 		 case PUT:
 		 case DELETE:
@@ -93,7 +105,7 @@ public class WebServerVertical extends AbstractVerticle  {
 			 break;
 		 case GET:
 			 router.get(entry.getPath())
-			 	.handler(new DefaultEntry(entry,this.messageContext));
+			 	.handler(new DefaultEntry(entry,this.messageContext,jsonUtil));
 			 break;
 		 }	 
 	 }

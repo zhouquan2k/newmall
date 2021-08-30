@@ -115,6 +115,10 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 					log.debug("recving packet:"+msg);
 					return r;
 				}
+				else if (parts.length==2) {
+					Request r=new Request(parts[0],parts[1],null);
+					return r;
+				}
 				return null;
 			}
 			catch (Throwable e)
@@ -210,6 +214,7 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 			// process respond
 			consumer.handler(record->{
 				Request req=record.value();
+				
 				if (req==null) {
 					log.warn("NODE {} received invalid response",context.nodeId);
 					return;
@@ -301,14 +306,14 @@ public class KafkaMessageContext extends AbstractVerticle implements MessageCont
 		consumer.handler(record->{
 			if (record.value() instanceof Request) {
 				Request req=(Request)record.value();
-				if (req==null)
-					log.warn("received a invalid request,ignore...");
-				else {
+				//if (req==null)
+				//	log.warn("received a invalid request,ignore...");
+				//else {
 					log.debug("NODE {} received request {}",context.nodeId,req); 
 					RequestContext rctx=new RequestContext(context,req);
-					Message msg=new MessageImpl(Message.Type.Command,rctx,req.content);
+					Message msg=new MessageImpl(Message.Type.Command,rctx,req!=null?req.content:null);
 					handler.handle(msg);
-				}
+				//}
 			}
 		});
 		

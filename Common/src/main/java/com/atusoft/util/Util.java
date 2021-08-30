@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.util.UUID;
+import java.util.function.Function;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -48,10 +49,15 @@ public class Util {
 		throw new RuntimeException("no result of type :"+cls.getName());
 	}
 	
-	public static <T> Future<T> onSuccess(Future<T>f,Handler<T> handler) {
-		return f.onSuccess(handler).onFailure(exception->{
+	public static <T> Future<T> onSuccess(Future<T>f,Function<T,Future<T>> handler) {
+		f.onFailure(exception->{
 			log.error(getErrStack(exception,0,0));
 		});
+		return f.compose(handler);
+	}
+	
+	public static void mustNotNull(Object obj) {
+		if (obj==null) throw new RuntimeException("NullCheck");
 	}
 	
 	

@@ -1,12 +1,9 @@
 package com.atusoft.newmall.order.domain;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
-
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.User;
@@ -17,6 +14,8 @@ import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 import com.atusoft.util.Util;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -24,14 +23,14 @@ import io.vertx.core.Promise;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Component
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+//@Component
+//@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Order  extends BaseEntity {
 	
 	final OrderDTO order;
 	
-		
-	public Order(OrderDTO order){
+	@JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+	public Order(@JsonProperty("order") OrderDTO order){
 		this.order=order;
 		//TODO copy from it instead of reference it.
 	}
@@ -50,6 +49,7 @@ public class Order  extends BaseEntity {
 			this.order.setUserId(user.getUserId());
 			this.infrastructure.persistEntity(this.order.getOrderId(),this, 60*10);
 			this.infrastructure.publishEvent(new OrderCreatedEvent(this.order));
+			return Future.succeededFuture();
 		});
 		
 	
@@ -81,6 +81,7 @@ public class Order  extends BaseEntity {
 			
 			this.order.setPayPrice(total);
 			this.order.setDeductionPrice(deduction);
+			this.save(10*60);
 			
 			//do calculations
 			log.debug("order calculated."+total);
@@ -92,9 +93,16 @@ public class Order  extends BaseEntity {
 		return this.order;
 	}
 	
+	@Override
+	public String getId() {
+		return this.order.getOrderId();
+	}
+	
 
 	public void submit() {
+		this.order.setSubmitTime(LocalDateTime.now());
 		this.order.setStatus(Status.Submited);
+		this.save();
 		this.infrastructure.publishEvent(new OrderSubmitedEvent(this.order));
 	}
 }

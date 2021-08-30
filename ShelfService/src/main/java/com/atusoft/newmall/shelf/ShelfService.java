@@ -10,10 +10,12 @@ import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
 import com.atusoft.infrastructure.Infrastructure;
 import com.atusoft.newmall.shelf.domain.Shelf;
+import com.atusoft.util.BusiException;
 import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
@@ -60,7 +62,25 @@ public class ShelfService extends BaseService {
 	
 	@EventHandler
 	public void onOrderSubmitedEvent(OrderSubmitedEvent event) {
+		OrderDTO order=event.getOrder();
+		List<Future> all=new ArrayList<Future>();
+		for (PurchaseItem item:event.getOrder().getPurchaseItems()) {
+			Future<?> f=this.infrastructure.getEntity(Shelf.class,item.getShelfId()).map(shelf->{
+				return shelf.purchase(item);
+			});
+			all.add(f);
 		
+		}
+		CompositeFuture.all(all).onFailure(e->{
+			OrderExceptionEvent eEvent;
+			if (e instanceof BusiException)
+				eEvent=new OrderExceptionEvent(event,(BusiException)e);
+			else 
+				eEvent=new OrderExceptionEvent(event,OrderExceptionEvent.Cause.Unknown,"ShelfService");
+			
+			this.infrastructure.publishEvent(eEvent);
+				
+		});
 	}
 	
 }

@@ -33,6 +33,7 @@ public class JsonUtil implements  com.atusoft.util.JsonUtil
 		
 	
 		mapper = new ObjectMapper();
+		mapper.findAndRegisterModules();
 		JsonFactory factory = mapper.getFactory();
 		factory.enable(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES);
 		//factory.enable(JsonGenerator.Feature.WRITE_NUMBERS_AS_STRINGS);

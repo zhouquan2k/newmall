@@ -93,7 +93,12 @@ class OrderServiceApplicationTests extends BaseTest {
 		assertTrue(result.getDeductionPrice().compareTo(new BigDecimal("100"))==0);
 		assertTrue(result.getPayPrice().compareTo(new BigDecimal("0"))==0);
 		System.out.println(result);
-				
+		
+		Order order=infrastructure.getEntity(Order.class, orderId).result();
+		result=order.getOrder();
+		assertTrue(result.getTotalPrice().compareTo(new BigDecimal("100"))==0);
+		assertTrue(result.getDeductionPrice().compareTo(new BigDecimal("100"))==0);
+		assertTrue(result.getPayPrice().compareTo(new BigDecimal("0"))==0);
 		
 	}
 	
@@ -118,7 +123,7 @@ class OrderServiceApplicationTests extends BaseTest {
 		
 		OrderCancelledEvent event=infrastructure.assureEvent(OrderCancelledEvent.class);
 		assertTrue(event!=null);
-		Order order=this.infrastructure.getEntity(Order.class, orderId).result();
+		Order order=infrastructure.getEntity(Order.class, orderId).result();
 		assertEquals(order.getOrder().getStatus(),OrderDTO.Status.Cancelled);
 		
 	}

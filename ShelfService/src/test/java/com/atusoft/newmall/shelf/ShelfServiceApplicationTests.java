@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.UserLoginEvent;
 import com.atusoft.newmall.shelf.domain.Shelf;
 import com.atusoft.test.BaseTest;
+import com.atusoft.util.BusiException;
 
 
 class ShelfServiceApplicationTests extends BaseTest {
@@ -76,6 +78,25 @@ class ShelfServiceApplicationTests extends BaseTest {
 		PurchaseItem pi=event.getOrder().getPurchaseItems().get(0);
 		Shelf shelf=infrastructure.getEntity(Shelf.class,pi.getShelfId()).result();
 		assertEquals(shelfStock-pi.getCount(),shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock);
+		System.out.println(shelf.getShelf());
+		shelfStock=shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).getStock();
+	}
+	
+	@Test
+	@Order(5)
+	public void testOrderSubmitedWithOutOfShelf() {
+		String json=orderJson;
+		OrderSubmitedEvent event=this.jsonUtil.fromJson(json,OrderSubmitedEvent.class);
+		event.getOrder().getPurchaseItems().get(0).setCount(10);
+		service.onOrderSubmitedEvent(event);
+		OrderExceptionEvent eEvent=infrastructure.assureEvent(OrderExceptionEvent.class);
+		assertEquals(eEvent.getCause(),OrderExceptionEvent.Cause.ShelfOutOfStock);
+		assertEquals(((BusiException)eEvent.getException()).getLocation(),"Shelf");
+		
+		PurchaseItem pi=event.getOrder().getPurchaseItems().get(0);
+		Shelf shelf=infrastructure.getEntity(Shelf.class,pi.getShelfId()).result();
+		assertEquals(shelfStock,shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock);
+		System.out.println(shelf.getShelf());
 	}
 	
 }
