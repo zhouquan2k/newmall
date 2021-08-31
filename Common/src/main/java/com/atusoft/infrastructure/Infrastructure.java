@@ -1,5 +1,7 @@
 package com.atusoft.infrastructure;
 
+import java.util.List;
+
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
@@ -15,6 +17,8 @@ public interface Infrastructure {
 	<T> Future<T> persistEntity(String key,T entity,int timeoutInSeconds); //timeoutInSeconds<=0 means forever
 	Future<User> getCurrentUser(BaseDTO dto);
 	Future<User> getCurrentUser(BaseEvent event);
+	
+	Future<List<BaseEvent>> getEventsByCause(String causeEventId);
 	
 	
 	

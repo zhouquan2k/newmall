@@ -46,7 +46,12 @@ public class OrderService extends BaseService {
 	
 	@EventHandler
 	public void onOrderExceptionEvent(OrderExceptionEvent event) {
-		//TODO
+		
+		Util.onSuccess(this.infrastructure.getEntity(Order.class,event.getOrderId()),order->{
+			Util.mustNotNull(order);
+			order.cancel(event);
+			return Future.succeededFuture();
+		});
 	}
 	
 	

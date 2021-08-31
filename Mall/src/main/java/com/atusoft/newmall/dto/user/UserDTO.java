@@ -5,8 +5,10 @@ import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.infrastructure.User;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class UserDTO extends BaseDTO implements UserObject {
 
 	String userId;

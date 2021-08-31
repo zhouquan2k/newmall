@@ -8,8 +8,13 @@ public class OrderCancelledEvent extends BaseEvent {
 	
 	protected OrderCancelledEvent() {
 	}
-	public OrderCancelledEvent(OrderDTO order) {
+	public OrderCancelledEvent(String causeEventId,OrderDTO order) {
 		super(order);
+		this.causeEventId=causeEventId;
 		this.order=order;
+	}
+	
+	public OrderDTO getOrder() {
+		return this.order;
 	}
 }

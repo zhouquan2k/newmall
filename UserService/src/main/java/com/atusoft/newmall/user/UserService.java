@@ -25,7 +25,7 @@ public class UserService extends BaseService {
 	@CommandHandler
 	public void SaveUser(UserDTO dUser) {
 		User user=this.infrastructure.newEntity(User.class, dUser);
-		user.save();
+		user.save(null); //User changed
 	}
 	
 	@EventHandler

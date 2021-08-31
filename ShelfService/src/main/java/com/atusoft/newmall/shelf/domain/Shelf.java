@@ -1,9 +1,11 @@
 package com.atusoft.newmall.shelf.domain;
 
 import com.atusoft.infrastructure.BaseEntity;
+import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.shelf.ShelfItemChangedEvent;
 import com.atusoft.newmall.shelf.ShelfDTO;
 import com.atusoft.newmall.shelf.ShelfDTO.ShelfItem;
 import com.atusoft.util.BusiException;
@@ -36,18 +38,19 @@ public class Shelf extends BaseEntity {
 		return item;
 	}
 	
-	public Future<ShelfDTO> save() {
-		return this.infrastructure.persistEntity(this.shelf.getShelfId(), this, 0).map(r->{
-			return r.getShelf();
-		});
-	}
 	
-	public Future<ShelfDTO> purchase(PurchaseItem item) {
+	public Future<ShelfDTO> purchase(BaseEvent cause,PurchaseItem item) {
 		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(item.getSkuId());
 		if (shelfItem.getStock()<item.getCount())
 			throw new BusiException("ShelfOutOfStock","ShelfOutOfStock","Shelf");
 		shelfItem.setStock(shelfItem.getStock()-item.getCount());
-		return this.save();
+		return (Future<ShelfDTO>)this.save(new ShelfItemChangedEvent(cause.getEventId(),item.getShelfId(),item.getSkuId(),-item.getCount()));
+	}
+	
+	public void cancelOrder(ShelfItemChangedEvent e) {
+		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(e.getSkuId());
+		shelfItem.setStock(shelfItem.getStock()-e.getChangeCount());
+		this.save(new ShelfItemChangedEvent(null,this.getShelf().getShelfId(),shelfItem.getSkuId(),e.getChangeCount()));
 	}
 
 	@Override

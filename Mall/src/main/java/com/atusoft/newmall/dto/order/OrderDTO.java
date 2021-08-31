@@ -7,12 +7,14 @@ import java.util.List;
 import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.newmall.dto.user.CouponDTO;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 
 //using base class or as another param
 //TODO OrderEx: for output
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class OrderDTO extends BaseDTO {
 
 	String orderId; // for output
@@ -60,6 +62,7 @@ public class OrderDTO extends BaseDTO {
 	
 	
 	@Data
+	@EqualsAndHashCode(callSuper=false)
 	public static class CouponDeduction extends Deduction {
 		String couponId;//null means no deduction
 		List<CouponDTO> coupons;

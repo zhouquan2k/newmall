@@ -1,6 +1,7 @@
 package com.atusoft.infrastructure.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -9,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
+import com.atusoft.framwork.PersistUtil;
 import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.Infrastructure;
-import com.atusoft.infrastructure.PersistUtil;
 import com.atusoft.infrastructure.User;
 import com.atusoft.messaging.Message;
 import com.atusoft.messaging.MessageContext;
@@ -29,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class InfrastructureImpl implements Infrastructure  {
 
 	@Autowired
-	PersistUtil persistUtil;
+	protected PersistUtil persistUtil;
 	
 	@Autowired
 	MessageContext messageContext;
@@ -102,6 +103,13 @@ public class InfrastructureImpl implements Infrastructure  {
 	@Override
 	public void publishEvent(BaseEvent event) {
 		log.debug("publishing event:"+event);
+		//persist event to do rollback
+		//TODO assure sync
+		/*
+		RedisAPI redis=(RedisAPI)this.persistUtil.getLowApi();
+		redis.rpush(Arrays.asList(event.getCauseEventId(),PersistUtil.obj2str(jsonUtil,event)));
+		*/
+		this.persistUtil.persistEvent(event.getCauseEventId(), event);
 		this.messageContext.publish("Event."+event.getClass().getName(),event);
 	}
 
@@ -110,6 +118,7 @@ public class InfrastructureImpl implements Infrastructure  {
 		return Util.getUUID();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Future<T> request(String name, Object request,Class<T> cls) {
 		Future<Message> f=this.messageContext.request("Command."+name, request);
@@ -135,6 +144,14 @@ public class InfrastructureImpl implements Infrastructure  {
 	}
 
 
-	
+	@Override
+	public Future<List<BaseEvent>> getEventsByCause(String causeEventId) {
+		return this.persistUtil.getEvents(causeEventId);
+	}
+
+
+	public void dump() {
+		this.persistUtil.dump();
+	}
 
 }

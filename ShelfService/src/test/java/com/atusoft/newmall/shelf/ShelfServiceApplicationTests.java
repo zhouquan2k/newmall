@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
@@ -25,9 +26,10 @@ class ShelfServiceApplicationTests extends BaseTest {
 	ShelfService service;
 	
 	static int shelfStock=0;
+	static String submitEventId;
 	
 	final String orderJson="{order:{orderId:\"order_1\",purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}]},_token:\"token_1\"}";
-	
+	final String orderJson2="{order:{orderId:\"order_2\",purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}]},_token:\"token_1\"}";
 	@Test
 	void contextLoads() {
 	}
@@ -74,6 +76,7 @@ class ShelfServiceApplicationTests extends BaseTest {
 	public void testOrderSubmited() {
 		String json=orderJson;
 		OrderSubmitedEvent event=this.jsonUtil.fromJson(json,OrderSubmitedEvent.class);
+		submitEventId=event.getEventId();
 		service.onOrderSubmitedEvent(event);
 		PurchaseItem pi=event.getOrder().getPurchaseItems().get(0);
 		Shelf shelf=infrastructure.getEntity(Shelf.class,pi.getShelfId()).result();
@@ -84,10 +87,25 @@ class ShelfServiceApplicationTests extends BaseTest {
 	
 	@Test
 	@Order(5)
-	public void testOrderSubmitedWithOutOfShelf() {
+	public void testOrderCancelledEvent() {
 		String json=orderJson;
+		OrderCancelledEvent event=this.jsonUtil.fromJson(json,OrderCancelledEvent.class);
+		event.setCauseEventId(submitEventId);
+		service.onOrderCancelledEvent(event);
+		PurchaseItem pi=event.getOrder().getPurchaseItems().get(0);
+		Shelf shelf=infrastructure.getEntity(Shelf.class,pi.getShelfId()).result();
+		assertEquals(shelfStock+pi.getCount(),shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock);
+		shelfStock=shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock;
+		
+	}
+	
+	@Test
+	@Order(6)
+	public void testOrderSubmitedWithOutOfShelf() {
+		String json=orderJson2;
 		OrderSubmitedEvent event=this.jsonUtil.fromJson(json,OrderSubmitedEvent.class);
-		event.getOrder().getPurchaseItems().get(0).setCount(10);
+		submitEventId=event.getEventId();
+		event.getOrder().getPurchaseItems().get(0).setCount(20);
 		service.onOrderSubmitedEvent(event);
 		OrderExceptionEvent eEvent=infrastructure.assureEvent(OrderExceptionEvent.class);
 		assertEquals(eEvent.getCause(),OrderExceptionEvent.Cause.ShelfOutOfStock);
@@ -98,5 +116,22 @@ class ShelfServiceApplicationTests extends BaseTest {
 		assertEquals(shelfStock,shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock);
 		System.out.println(shelf.getShelf());
 	}
+	
+	@Test
+	@Order(7)
+	public void testOrderCancelledEventWhenExceptionAlreadyThrown() {
+		String json=orderJson;
+		OrderCancelledEvent event=this.jsonUtil.fromJson(json,OrderCancelledEvent.class);
+		event.setCauseEventId(submitEventId);
+		service.onOrderCancelledEvent(event);
+		PurchaseItem pi=event.getOrder().getPurchaseItems().get(0);
+		Shelf shelf=infrastructure.getEntity(Shelf.class,pi.getShelfId()).result();
+		infrastructure.dump();
+		assertEquals(shelfStock,shelf.getShelf().getSku2Shelf().get(pi.getSkuId()).stock);
+		
+		
+
+	}
+	
 	
 }

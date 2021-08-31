@@ -8,7 +8,6 @@ import java.util.function.Function;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
-import io.vertx.core.Handler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -42,6 +41,7 @@ public class Util {
 		return UUID.randomUUID().toString().replace("-","").toLowerCase();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static <T> T getFutureResult(CompositeFuture cf,Class<T> cls)  {
 		for (Object o:cf.list()) {
 			if (cls.isAssignableFrom(o.getClass())) return (T)o;

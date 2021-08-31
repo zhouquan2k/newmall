@@ -1,12 +1,11 @@
 package com.atusoft.newmall.event.user;
 
 import com.atusoft.infrastructure.BaseEvent;
-import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.user.UserDTO;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserLoginEvent extends BaseEvent {
 	String userId;
 	

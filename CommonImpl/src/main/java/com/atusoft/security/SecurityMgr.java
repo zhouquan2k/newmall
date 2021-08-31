@@ -2,8 +2,8 @@ package com.atusoft.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.atusoft.framwork.PersistUtil;
 import com.atusoft.framwork.UserObject;
-import com.atusoft.infrastructure.PersistUtil;
 import com.atusoft.infrastructure.User;
 import com.atusoft.util.SecurityUtil;
 

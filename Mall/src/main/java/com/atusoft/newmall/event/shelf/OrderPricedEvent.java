@@ -1,13 +1,11 @@
 package com.atusoft.newmall.event.shelf;
 
-import java.util.List;
-
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.order.OrderDTO;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class OrderPricedEvent extends BaseEvent {
 
 	OrderDTO order;

@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.atusoft.infrastructure.BaseEntity;
+import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.User;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.Status;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
@@ -47,8 +49,8 @@ public class Order  extends BaseEntity {
 		
 		Util.onSuccess(fUser,user->{
 			this.order.setUserId(user.getUserId());
-			this.infrastructure.persistEntity(this.order.getOrderId(),this, 60*10);
-			this.infrastructure.publishEvent(new OrderCreatedEvent(this.order));
+			this.order.setStatus(Status.Preview);
+			this.save(new OrderCreatedEvent(this.order),60*10);
 			return Future.succeededFuture();
 		});
 		
@@ -81,7 +83,7 @@ public class Order  extends BaseEntity {
 			
 			this.order.setPayPrice(total);
 			this.order.setDeductionPrice(deduction);
-			this.save(10*60);
+			this.save(null,10*60);
 			
 			//do calculations
 			log.debug("order calculated."+total);
@@ -102,7 +104,12 @@ public class Order  extends BaseEntity {
 	public void submit() {
 		this.order.setSubmitTime(LocalDateTime.now());
 		this.order.setStatus(Status.Submited);
-		this.save();
-		this.infrastructure.publishEvent(new OrderSubmitedEvent(this.order));
+		this.save(new OrderSubmitedEvent(this.order));
+	}
+	
+	public void cancel(BaseEvent event) {
+		this.order.setStatus(Status.Cancelled);
+		this.save(new OrderCancelledEvent(event.getCauseEventId(),this.order));
+		
 	}
 }

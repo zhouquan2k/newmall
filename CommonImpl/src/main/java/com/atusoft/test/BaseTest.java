@@ -14,37 +14,15 @@ import com.atusoft.messaging.MessageContext;
 import com.atusoft.redis.RedisUtil;
 import com.atusoft.util.JsonUtil;
 
-import lombok.extern.slf4j.Slf4j;
 
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Import(MyTestConfiguration.class)
-@Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BaseTest {
 	
-	/*
-	@TestConfiguration
-	@Profile("test")
-	@Scope("prototype")
-    static class MyTestConfiguration {
- 
-        //tests specific beans
-		 @Bean
-		 @Primary
-		 Infrastructure testInfrastructure(){
-		     return new Infrastructure4Test();
-		 }
-		    
-		 @Bean
-		 @Primary
-		 PersistUtil testPersistUtil(){
-		    return new TestPersistUtil();
-		 }
-    }
-    */
-	
+		
 	@MockBean
 	MessageContext messageContext;
 	

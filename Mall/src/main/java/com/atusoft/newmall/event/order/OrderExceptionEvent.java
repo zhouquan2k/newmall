@@ -2,11 +2,11 @@ package com.atusoft.newmall.event.order;
 
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.util.BusiException;
-
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-@Data
+import lombok.Getter;
+
+@Getter
 public class OrderExceptionEvent extends BaseEvent{
 	
 	public enum Cause {
@@ -17,18 +17,22 @@ public class OrderExceptionEvent extends BaseEvent{
 	@JsonIgnore
 	Throwable exception;
 	
+	String orderId;
+	
 	protected OrderExceptionEvent() {
 	}
 	
 	
-	public OrderExceptionEvent(BaseEvent originEvent,Cause cause,String description) {
+	public OrderExceptionEvent(BaseEvent originEvent,String orderId,Cause cause,String description) {
 		super(originEvent);
+		this.orderId=orderId;
 		this.cause=cause;
 		this.description=description;
 	}
 	
-	public OrderExceptionEvent(BaseEvent originEvent,BusiException e) {
+	public OrderExceptionEvent(BaseEvent originEvent,String orderId,BusiException e) {
 		super(originEvent);
+		this.orderId=orderId;
 		this.cause=Cause.valueOf(e.getBusiCode());
 		this.description=e.getMessage();
 		this.exception=e;

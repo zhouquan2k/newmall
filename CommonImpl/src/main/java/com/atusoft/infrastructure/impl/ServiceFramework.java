@@ -25,6 +25,7 @@ import com.atusoft.messaging.Message;
 import com.atusoft.messaging.MessageContext;
 import com.atusoft.messaging.MessageHandler;
 import com.atusoft.util.JsonUtil;
+import com.atusoft.util.SecurityUtil;
 
 import io.vertx.core.Future;
 import lombok.extern.slf4j.Slf4j;
@@ -45,19 +46,23 @@ class ServiceFramework implements MessageHandler {
 	@Value("${app.service-name}")
 	String serviceName;
 	
+	@Autowired 
+	SecurityUtil securityUtil;
+	
 	
 	class ContextImpl implements Context {
 
 		ApiMessage command;
-		ContextImpl(ApiMessage command) {
+		SecurityUtil securityUtil;
+		ContextImpl(ApiMessage command,SecurityUtil securityUtil) {
 			this.command=command;
+			this.securityUtil=securityUtil;
 		}
 		@Override
 		public User getCurrentUser() {
-			// TODO Auto-generated method stub
+			
 			String token=command.getParam("_token");
-			//securityMgr.getCurrentUser(token) //load from nosql
-			return null;
+			return this.securityUtil.getCurrentUser(token).result();
 		}
 		
 	}
@@ -154,7 +159,7 @@ class ServiceFramework implements MessageHandler {
 					}
 				}
 				else if (Context.class.isAssignableFrom(c)) {
-					params[i]=new ContextImpl(command);
+					params[i]=new ContextImpl(command,this.securityUtil);
 				}
 				else {
 					if (command.getParams().containsKey(parameters[i].getName())) {
@@ -190,6 +195,7 @@ class ServiceFramework implements MessageHandler {
 		
 	}
 	
+	@SuppressWarnings("unchecked")
 	private <T> T convertFromString(String src,Class<T> cls) {
 		if (cls.isPrimitive()) {
 			if (cls.equals(java.lang.Integer.TYPE))

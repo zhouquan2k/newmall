@@ -1,11 +1,12 @@
+
 package com.atusoft.newmall.event.order;
 
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.order.OrderDTO;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class OrderCreatedEvent extends BaseEvent {
 	OrderDTO order;
 	

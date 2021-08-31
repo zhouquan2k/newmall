@@ -110,7 +110,7 @@ class OrderServiceApplicationTests extends BaseTest {
 		OrderSubmitedEvent event=infrastructure.assureEvent(OrderSubmitedEvent.class);
 		assertTrue(event!=null);
 		lastEvent=event;
-		Order order=this.infrastructure.getEntity(Order.class, orderId).result();
+		Order order=infrastructure.getEntity(Order.class, orderId).result();
 		assertEquals(order.getOrder().getStatus(),OrderDTO.Status.Submited);
 	}
 	
@@ -118,7 +118,7 @@ class OrderServiceApplicationTests extends BaseTest {
 	@org.junit.jupiter.api.Order(4)
 	public void testCancelEvent() throws InterruptedException {
 		//Future<?> ret=
-		OrderExceptionEvent exception=new OrderExceptionEvent(lastEvent,Cause.ShelfOutOfStock,"Shelf OutOfStock");
+		OrderExceptionEvent exception=new OrderExceptionEvent(lastEvent,orderId,Cause.ShelfOutOfStock,"Shelf OutOfStock");
 		orderService.onOrderExceptionEvent(exception);
 		
 		OrderCancelledEvent event=infrastructure.assureEvent(OrderCancelledEvent.class);

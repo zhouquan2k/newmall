@@ -23,7 +23,7 @@ public class User extends BaseEntity {
 
 	public void saveAccount(AccountDTO account) {
 		this.account=account; //TODO copy;
-		this.save();
+		this.save(null);//TODO AccountChangedEvent
 	}
 		
 	//account
@@ -38,7 +38,7 @@ public class User extends BaseEntity {
 		if (this.account.getBrokerage().compareTo(deduction)<0) 
 			throw new BusiException("BrokerageDeductionFail","BrokerageDeductionFail","User");
 		this.account.setBrokerage(account.getBrokerage().subtract(deduction));
-		this.save();
+		this.save(null); //TODO AccountBrokerChangedEvent
 	}
 	
 	UserDTO getUser() {
