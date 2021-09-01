@@ -40,4 +40,17 @@
 			</plugin>
 	</plugins>
 	</build>
+	<distributionManagement>
+        <!-- repository>
+            <id>atuspace-component-maven</id>
+            <name>maven</name>
+            <url>https://atuspace-maven.pkg.coding.net/repository/component/maven/</url>
+        </repository-->
+        <snapshotRepository>
+	      <uniqueVersion>false</uniqueVersion>
+	      <id>atuspace-component-maven</id>
+	      <name>maven</name>
+	      <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven</url>
+	    </snapshotRepository>
+    </distributionManagement>
 </project>
