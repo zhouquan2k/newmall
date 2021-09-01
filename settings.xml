@@ -1,0 +1,52 @@
+<settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+<!--mirrors>
+    <mirror>
+        <id>alimaven</id>
+        <name>aliyun maven</name>
+        <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+        <mirrorOf>central</mirrorOf>
+    </mirror>
+    <mirror>
+        <id>CN</id>
+        <name>OSChina Central</name>
+        <url>http://maven.oschina.net/content/groups/public/</url>
+        <mirrorOf>central</mirrorOf>
+    </mirror>
+    <mirror>
+        <id>nexus</id>
+        <name>internal nexus repository</name>
+        <url>http://repo.maven.apache.org/maven2</url>
+        <mirrorOf>central</mirrorOf>
+    </mirror>
+</mirrors>
+<servers-->
+	<server>
+            <id>atuspace-component-maven</id>
+            <username>maven-1630515749832</username>
+            <password>4e359db8aee582cde2aad25cc979da02fd59e464</password>
+    </server>
+</servers>
+<profiles>
+        <profile>
+            <id>Repository Proxy</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <repositories>
+                <repository>
+                    <id>atuspace-component-maven</id>
+                    <name>maven</name>
+                    <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
+
+
+</settings>
