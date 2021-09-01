@@ -1,29 +1,28 @@
 package com.atusoft.newmall.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 
-import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.PromoterLevel;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.user.UserLoginEvent;
 import com.atusoft.test.BaseTest;
-import com.atusoft.util.JsonUtil;
 
 class UserServiceApplicationTests extends BaseTest {
 
 	@Autowired
 	UserService userService;
+	
+	static String submitEventId;
+	static BigDecimal brokerageBalance;
 	
 	
 	@Test
@@ -51,7 +50,7 @@ class UserServiceApplicationTests extends BaseTest {
 		
 	}
 	
-	final String orderJson="{order:{orderId:\"order_1\",purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}],brokerageDeduction:{deduction:true,deducted:5},deductionPrice:5},_token:\"token_1\"}";
+	final String orderJson="{order:{orderId:\"order_1\",purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}],brokerageDeduction:{deduction:true,deducted:5},deductionPrice:5,userId:\"27\"},_token:\"token_1\"}";
 
 	
 	@Test
@@ -68,6 +67,7 @@ class UserServiceApplicationTests extends BaseTest {
 	@Order(2)
 	public void testBrokerageDeduction() {		
 		OrderSubmitedEvent event=this.jsonUtil.fromJson(orderJson,OrderSubmitedEvent.class);
+		submitEventId=event.getEventId();
 		String userId=infrastructure.getCurrentUser(event).result().getUserId();
 		User user=infrastructure.getEntity(User.class,userId).result();
 		//BigDecimal initBalance=user.getAccount().getBalance();
@@ -75,6 +75,19 @@ class UserServiceApplicationTests extends BaseTest {
 		this.userService.onOrderSubmitedEvent(event);
 		User user2=infrastructure.getEntity(User.class,userId).result();
 		assertEquals(initBrokerageBalance.subtract(event.getOrder().getDeductionPrice()),user2.getAccount().getBrokerage());
+		brokerageBalance=user2.getAccount().getBrokerage();
+	}
+	
+	@Test
+	@Order(3)
+	public void testCancelOrder() {		
+		String json=orderJson;
+		OrderCancelledEvent event=this.jsonUtil.fromJson(json,OrderCancelledEvent.class);
+		event.setCauseEventId(submitEventId);
+		userService.onOrderCancelledEvent(event);
+		User user=infrastructure.getEntity(User.class,event.getOrder().getUserId()).result();
+		assertEquals(brokerageBalance.add(event.getOrder().getDeductionPrice()),user.getAccount().getBrokerage());
+		infrastructure.dump();
 	}
 	
 

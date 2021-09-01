@@ -1,6 +1,6 @@
 package com.atusoft.infrastructure;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 import com.atusoft.util.Util;
 
@@ -10,7 +10,7 @@ import lombok.Data;
 public class BaseEvent {
 	
 	String eventId=Util.getUUID();
-	long timestamp=Calendar.getInstance().getTimeInMillis();
+	LocalDateTime timestamp=LocalDateTime.now();
 	
 	protected String businessId; // from client
 	protected String causeEventId; //event who cause current event.

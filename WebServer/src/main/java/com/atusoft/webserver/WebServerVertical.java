@@ -50,7 +50,7 @@ class DefaultEntry implements Handler<RoutingContext> {
 			 HttpServerResponse response = routingContext.response();
 			 response
 			       .putHeader("Content-Type", "application/json")
-			       .end(""+((message.getContent()!=null)?jsonUtil.toJson(message.getContent()):""));
+			       .end(""+((message.getContent()!=null)?message.getContent():""));
 			   
 		 });
 	}

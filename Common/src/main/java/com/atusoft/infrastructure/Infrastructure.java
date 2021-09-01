@@ -28,6 +28,6 @@ public interface Infrastructure {
 	String getUUID();
 	String toJson(Object obj);
 	
-	Promise<?> addPendingFuture(String key);
-	Promise<?> getPendingFuture(String key);
+	Promise<BaseEvent> addPendingFuture(String key);
+	Promise<BaseEvent> getPendingFuture(String key);
 }

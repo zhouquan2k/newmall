@@ -28,6 +28,7 @@ public class ApiMessage {
 	}
 	
 	public String getParam(String name) {
+		if (params==null) return null;
 		return params.get(name);
 	}
 }

@@ -4,8 +4,10 @@ import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.user.UserDTO;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString
 public class UserLoginEvent extends BaseEvent {
 	String userId;
 	

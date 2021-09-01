@@ -5,8 +5,10 @@ import com.atusoft.util.BusiException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Getter;
+import lombok.ToString;
 
 @Getter
+@ToString(callSuper=true)
 public class OrderExceptionEvent extends BaseEvent{
 	
 	public enum Cause {

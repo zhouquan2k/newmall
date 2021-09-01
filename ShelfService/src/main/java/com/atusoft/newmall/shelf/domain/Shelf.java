@@ -32,6 +32,7 @@ public class Shelf extends BaseEntity {
 	}
 	
 	public PurchaseItem getPrice(PurchaseItem item,User user) {
+		//TODO check shelf stock
 		UserDTO userDto=(UserDTO)user.getUserObject();
 		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(item.getSkuId());
 		item.setUnitPrice(shelfItem.getPromoterPrices().get(userDto.getPromoterLevel()));
@@ -39,12 +40,13 @@ public class Shelf extends BaseEntity {
 	}
 	
 	
+	@SuppressWarnings("unchecked")
 	public Future<ShelfDTO> purchase(BaseEvent cause,PurchaseItem item) {
 		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(item.getSkuId());
 		if (shelfItem.getStock()<item.getCount())
 			throw new BusiException("ShelfOutOfStock","ShelfOutOfStock","Shelf");
 		shelfItem.setStock(shelfItem.getStock()-item.getCount());
-		return (Future<ShelfDTO>)this.save(new ShelfItemChangedEvent(cause.getEventId(),item.getShelfId(),item.getSkuId(),-item.getCount()));
+		return (Future<ShelfDTO>)this.save(new ShelfItemChangedEvent(cause,item.getShelfId(),item.getSkuId(),-item.getCount()));
 	}
 	
 	public void cancelOrder(ShelfItemChangedEvent e) {

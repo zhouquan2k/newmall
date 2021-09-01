@@ -7,8 +7,10 @@ import com.atusoft.infrastructure.BaseDTO;
 import com.atusoft.newmall.dto.user.PromoterLevel;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class ShelfDTO extends BaseDTO {
 	
 	String shelfId;

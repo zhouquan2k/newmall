@@ -2,7 +2,6 @@ package com.atusoft.newmall.order.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.stream.Stream;
 
 import com.atusoft.infrastructure.BaseEntity;
@@ -61,7 +60,6 @@ public class Order  extends BaseEntity {
 			//计算抵扣，活动不能抵扣
 			//1.using price from shelf
 			CompositeFuture cf=r.result();
-			List<Object> results=cf.list();
 			
 			OrderPricedEvent pe=Util.getFutureResult(cf, OrderPricedEvent.class);
 			this.order.setPurchaseItems(pe.getOrder().getPurchaseItems());

@@ -16,6 +16,8 @@ public class MallApi {
 			
 			new ApiEntry(Method.POST,"/security","Security.Login"),
 			
+			new ApiEntry(Method.POST,"/shelf","Shelf.SaveShelf")
+			
 		});
 	}
 }

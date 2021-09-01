@@ -48,7 +48,7 @@ public class InfrastructureImpl implements Infrastructure  {
 	protected SecurityUtil securityUtil;
 	
 	
-	Map<String,Promise<?>> allPendingFutures=new HashMap<String,Promise<?>>();
+	Map<String,Promise<BaseEvent>> allPendingFutures=new HashMap<String,Promise<BaseEvent>>();
 	
 	
 	@PostConstruct
@@ -109,7 +109,10 @@ public class InfrastructureImpl implements Infrastructure  {
 		RedisAPI redis=(RedisAPI)this.persistUtil.getLowApi();
 		redis.rpush(Arrays.asList(event.getCauseEventId(),PersistUtil.obj2str(jsonUtil,event)));
 		*/
-		this.persistUtil.persistEvent(event.getCauseEventId(), event);
+		if (event.getCauseEventId()!=null&&!event.getCauseEventId().isBlank()) 
+			this.persistUtil.persistEvent(event.getCauseEventId(), event);
+		else //TODO to remove
+			this.persistUtil.persistEvent("debug_events", event);
 		this.messageContext.publish("Event."+event.getClass().getName(),event);
 	}
 
@@ -131,15 +134,15 @@ public class InfrastructureImpl implements Infrastructure  {
 	}
 
 	@Override
-	public Promise<?> addPendingFuture(String key) {
-		Promise<?> promise=Promise.promise();
+	public Promise<BaseEvent> addPendingFuture(String key) {
+		Promise<BaseEvent> promise=Promise.promise();
 		this.allPendingFutures.put(key,promise);
 		return promise;
 		
 	}
 
 	@Override
-	public Promise<?> getPendingFuture(String key) {
+	public Promise<BaseEvent> getPendingFuture(String key) {
 		return this.allPendingFutures.remove(key);
 	}
 

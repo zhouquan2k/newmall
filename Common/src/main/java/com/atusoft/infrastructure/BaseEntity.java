@@ -22,7 +22,7 @@ public abstract  class  BaseEntity {
 	}
 	
 	public Future<?> save(BaseEvent event,int expiration) {
-		Future<?> ret=this.infrastructure.persistEntity(this.getId(), this, 0);
+		Future<?> ret=this.infrastructure.persistEntity(this.getId(), this, expiration);
 		return ret.compose(o->{
 			if (event!=null) this.infrastructure.publishEvent(event);
 			return Future.succeededFuture(ret.result()); 

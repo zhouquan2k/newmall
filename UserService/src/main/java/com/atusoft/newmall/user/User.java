@@ -3,8 +3,12 @@ package com.atusoft.newmall.user;
 import java.math.BigDecimal;
 
 import com.atusoft.infrastructure.BaseEntity;
+import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
+import com.atusoft.newmall.event.user.AccountChangedEvent;
+import com.atusoft.newmall.event.user.AccountChangedEvent.ChangeType;
 import com.atusoft.util.BusiException;
 
 
@@ -25,20 +29,20 @@ public class User extends BaseEntity {
 		this.account=account; //TODO copy;
 		this.save(null);//TODO AccountChangedEvent
 	}
-		
-	//account
-	//TODO can't reuse in domain, move to service?, not depending on order
-	/*
-	public void getOrderBalance(OrderDTO order) {
-				
-	}
-	*/
 	
-	public void deductBrokerage(BigDecimal deduction) {
+	public void deductBrokerage(BaseEvent cause,BigDecimal deduction) {
 		if (this.account.getBrokerage().compareTo(deduction)<0) 
 			throw new BusiException("BrokerageDeductionFail","BrokerageDeductionFail","User");
 		this.account.setBrokerage(account.getBrokerage().subtract(deduction));
-		this.save(null); //TODO AccountBrokerChangedEvent
+		AccountChangedEvent event=new AccountChangedEvent(cause,this.getUser().getUserId(),ChangeType.Brokerage,deduction.negate());
+		this.save(event); 
+	}
+	
+	public void cancelOrder(OrderCancelledEvent cause,AccountChangedEvent event) {
+		this.account.setBrokerage(account.getBrokerage().subtract(event.getChange()));
+		AccountChangedEvent aEvent=new AccountChangedEvent(cause,this.getUser().getUserId(),ChangeType.Brokerage,event.getChange().negate());
+		this.save(aEvent); 
+
 	}
 	
 	UserDTO getUser() {

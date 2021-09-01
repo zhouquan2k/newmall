@@ -74,7 +74,7 @@ class OrderServiceApplicationTests extends BaseTest {
 		Thread.sleep(20);
 		OrderCreatedEvent event=infrastructure.assureEvent(OrderCreatedEvent.class);
 		assertTrue(event!=null);
-		this.orderId=event.getOrder().getOrderId();
+		orderId=event.getOrder().getOrderId();
 		dto.setOrderId(orderId);
 		
 		//assert event/response/repository

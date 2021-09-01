@@ -27,12 +27,11 @@ public class RedisPersistUtilImpl implements PersistUtil {
 	@Override
 	public <T> Future<T> getEntity(Class<T> cls, String key) {
 		final String lKey=(cls!=null)?cls.getSimpleName()+":"+key:key;
-		return this.redisUtil.getRedis().get(key).map(response->{
-			return (T)PersistUtil.str2Obj(jsonUtil, lKey, cls);
+		return this.redisUtil.getRedis().get(lKey).map(response->{
+			return (T)PersistUtil.str2Obj(jsonUtil, response.toString(), cls);
 		});
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public <T> Future<T> persistEntity(String key, T entity, int timeoutInSeconds) {
 		Future<Response> ret=null;
@@ -45,13 +44,13 @@ public class RedisPersistUtilImpl implements PersistUtil {
 		ret=this.redisUtil.getRedis().set(params).onFailure(e->{
 			e.printStackTrace();
 		});
-		return ret.map(r->(T)r);
+		return ret.map(r->entity);
 	}
 
 	@Override
 	public void persistEvent(String key, BaseEvent event) {
 		//TODO think about expiration, to keep less events
-		this.redisUtil.getRedis().rpush(Arrays.asList(event.getCauseEventId(),PersistUtil.obj2str(jsonUtil,event)));
+		this.redisUtil.getRedis().rpush(Arrays.asList("event:"+key,PersistUtil.obj2str(jsonUtil,event)));
 
 	}
 

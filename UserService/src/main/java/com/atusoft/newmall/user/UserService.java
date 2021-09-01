@@ -8,8 +8,10 @@ import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.order.OrderCancelledEvent;
 import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
+import com.atusoft.newmall.event.user.AccountChangedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
 
 @Component("service")
@@ -55,7 +57,18 @@ public class UserService extends BaseService {
 		this.infrastructure.getCurrentUser(event).onSuccess(user->{
 			this.infrastructure.getEntity(User.class,user.getUserId()).onSuccess(eUser->{
 				if (event.getOrder().getBrokerageDeduction()!=null&&event.getOrder().getBrokerageDeduction().isDeduction())
-					eUser.deductBrokerage(event.getOrder().getBrokerageDeduction().getDeducted());
+					eUser.deductBrokerage(event,event.getOrder().getBrokerageDeduction().getDeducted());
+			});
+		});
+	}
+	
+	@EventHandler
+	public void onOrderCancelledEvent(OrderCancelledEvent event) {
+		this.rollback(event, e->{
+			String userId=e.getSourceId();
+			this.infrastructure.getEntity(User.class,userId).onSuccess(user->{
+				if (e instanceof AccountChangedEvent) //ignore OrderExceptionEvent
+					user.cancelOrder(event,(AccountChangedEvent)e);
 			});
 		});
 	}

@@ -6,12 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
 import com.atusoft.infrastructure.Infrastructure;
-import com.atusoft.newmall.shelf.domain.Shelf;
-import com.atusoft.util.BusiException;
 import com.atusoft.newmall.BaseService;
 import com.atusoft.newmall.dto.order.OrderDTO;
 import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
@@ -21,7 +18,8 @@ import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.shelf.ShelfItemChangedEvent;
-import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
+import com.atusoft.newmall.shelf.domain.Shelf;
+import com.atusoft.util.BusiException;
 
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -32,6 +30,7 @@ public class ShelfService extends BaseService {
 	@Autowired
 	Infrastructure infrastructure;
 	
+	@SuppressWarnings("rawtypes")
 	@EventHandler
 	public void onOrderCreatedEvent(OrderCreatedEvent event) {
 		this.infrastructure.getCurrentUser(event).onSuccess(user->{
@@ -39,10 +38,10 @@ public class ShelfService extends BaseService {
 			OrderDTO order=event.getOrder();
 			List<Future> all=new ArrayList<Future>();
 			for (PurchaseItem item:event.getOrder().getPurchaseItems()) {
-				Future<?> f=this.infrastructure.getEntity(Shelf.class,item.getShelfId()).map(shelf->{
+				Future<Void> f=this.infrastructure.getEntity(Shelf.class,item.getShelfId()).compose(shelf->{
 					PurchaseItem pItem=shelf.getPrice(item,user);
 					allItems.add(pItem);
-					return null;
+					return Future.succeededFuture();
 				});
 				all.add(f);
 			}
@@ -75,6 +74,7 @@ public class ShelfService extends BaseService {
 		return (Future<ShelfDTO>)entity.save(null).map(s->((Shelf)s).getShelf());
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@EventHandler
 	public void onOrderSubmitedEvent(OrderSubmitedEvent event) {
 		OrderDTO order=event.getOrder();

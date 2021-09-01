@@ -55,7 +55,14 @@ public class TestPersistUtil implements PersistUtil {
 
 	@Override
 	public void dump() {
+		events.entrySet().stream().forEach(e->{
+			System.out.println(String.format("[%s]->\r\n",e.getKey()));
+			e.getValue().stream().forEach( i->{
+				System.out.println(String.format("- %s\r\n",i));
+			});
+		});
 		System.out.println(events);
+		
 		
 		System.out.println(entities);
 	}
