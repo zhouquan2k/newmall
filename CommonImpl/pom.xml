@@ -3,7 +3,6 @@
   <groupId>component</groupId>
   <artifactId>CommonImpl</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
  <parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -52,5 +51,19 @@
 			
 		</dependency>
   </dependencies>
+  
+  <distributionManagement>
+        <repository>
+            <id>atuspace-component-maven</id>
+            <name>maven</name>
+            <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven/</url>
+        </repository>
+        <snapshotRepository>
+	      <uniqueVersion>false</uniqueVersion>
+	      <id>atuspace-component-maven</id>
+	      <name>maven</name>
+	      <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven</url>
+	    </snapshotRepository>
+    </distributionManagement>
   
 </project>
