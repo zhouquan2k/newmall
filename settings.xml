@@ -18,8 +18,8 @@
         <url>http://repo.maven.apache.org/maven2</url>
         <mirrorOf>central</mirrorOf>
     </mirror>
-</mirrors>
-<servers-->
+</mirrors-->
+<servers>
 	<server>
             <id>atuspace-component-maven</id>
             <username>maven-1630515749832</username>
