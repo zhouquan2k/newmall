@@ -1,6 +1,13 @@
 <settings xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
-<!--mirrors>
-    <mirror>
+<mirrors>
+	<mirror>
+        <id>nexus-tencentyun</id>
+        <!-- 此配置避免了本仓库制品的拉取流量被切换到腾讯云镜像源，保证您在使用镜像加速的同时可以从本仓库拉取制品 -->
+        <mirrorOf>!atuspace-newmall-maven</mirrorOf>
+        <name>Nexus tencentyun</name>
+        <url>http://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
+    </mirror>
+    <!--mirror>
         <id>alimaven</id>
         <name>aliyun maven</name>
         <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
@@ -17,8 +24,8 @@
         <name>internal nexus repository</name>
         <url>http://repo.maven.apache.org/maven2</url>
         <mirrorOf>central</mirrorOf>
-    </mirror>
-</mirrors-->
+    </mirror-->
+</mirrors>
 <servers>
 	<server>
             <id>atuspace-component-maven</id>
