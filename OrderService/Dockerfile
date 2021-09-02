@@ -1,4 +1,4 @@
-FROM openjdk:11-jdk-alpine
+FROM openjdk:11-alpine
 
 LABEL maintainer="zhouquan <zhouquan2k@gmail.com>"
 
