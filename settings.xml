@@ -7,7 +7,7 @@
         <name>Nexus tencentyun</name>
         <url>http://mirrors.cloud.tencent.com/nexus/repository/maven-public/</url>
     </mirror>
-    <!--mirror>
+    <mirror>
         <id>alimaven</id>
         <name>aliyun maven</name>
         <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
@@ -24,7 +24,7 @@
         <name>internal nexus repository</name>
         <url>http://repo.maven.apache.org/maven2</url>
         <mirrorOf>central</mirrorOf>
-    </mirror-->
+    </mirror>
 </mirrors>
 <servers>
 	<server>
