@@ -3,6 +3,7 @@ package com.atusoft.redis;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Vertx;
@@ -16,6 +17,9 @@ public class RedisUtil  extends AbstractVerticle {
 	
 	//RedisConnection conn;
 	RedisAPI redis;
+	
+	@Value("${redis.url:redis://localhost:6379/1}")
+	String redisUrl;
 
 	@PostConstruct
 	public void init() {
@@ -27,7 +31,7 @@ public class RedisUtil  extends AbstractVerticle {
 				  // The client handles REDIS URLs. The select database as per spec is the
 				  // numerical path of the URL and the password is the password field of
 				  // the URL authority
-				  "redis://localhost:6379/1");  
+				  redisUrl);  
 				
 		r.connect()
 				 .onSuccess(conn -> {
