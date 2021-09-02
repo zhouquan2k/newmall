@@ -51,6 +51,19 @@
 			
 		</dependency>
   </dependencies>
+  <repositories>
+		<repository>
+		      <id>atuspace-component-maven</id>
+		      <name>maven</name>
+		      <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven/</url>
+		      <releases>
+	                <enabled>true</enabled>
+	          </releases>
+	          <snapshots>
+	                <enabled>true</enabled>
+	          </snapshots>
+		</repository>
+	</repositories>
   
   <distributionManagement>
         <repository>
@@ -65,18 +78,6 @@
 	      <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven</url>
 	    </snapshotRepository>
     </distributionManagement>
-    <repositories>
-		<repository>
-		      <id>atuspace-component-maven</id>
-		      <name>maven</name>
-		      <url>https://atuspace-maven.pkg.coding.net/repository/newmall/maven/</url>
-		      <releases>
-	                <enabled>true</enabled>
-	          </releases>
-	          <snapshots>
-	                <enabled>true</enabled>
-	          </snapshots>
-		</repository>
-	</repositories>
+    
   
 </project>
