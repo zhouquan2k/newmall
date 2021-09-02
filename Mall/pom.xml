@@ -2,29 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.atusoft.newmall</groupId>
   <artifactId>Mall</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
   <parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.5.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
-	</parent>
-  <properties>
-		<java.version>11</java.version>
-	</properties>
-  <dependencies>
-  	<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-  	<dependency>
-		<groupId>org.projectlombok</groupId>
-		<artifactId>lombok</artifactId>
-	</dependency>
-	<dependency>
 		<groupId>component</groupId>
-		<artifactId>Common</artifactId>
+		<artifactId>parent</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-	</dependency>
- </dependencies>
+		<relativePath>..</relativePath> <!-- lookup parent from repository -->
+  </parent>
+  	
+  <dependencies>
+  
+  </dependencies>
 </project>
