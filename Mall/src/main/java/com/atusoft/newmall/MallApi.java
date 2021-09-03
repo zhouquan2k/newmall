@@ -16,7 +16,12 @@ public class MallApi {
 			
 			new ApiEntry(Method.POST,"/security","Security.Login"),
 			
-			new ApiEntry(Method.POST,"/shelf","Shelf.SaveShelf")
+			new ApiEntry(Method.POST,"/shelf","Shelf.SaveShelf"),
+			
+			new ApiEntry(Method.POST,"/user","User.SaveUser"),
+			new ApiEntry(Method.POST,"/user/account","User.SaveAccount"),
+			new ApiEntry(Method.POST,"/security/login","User.Login")
+			
 			
 		});
 	}

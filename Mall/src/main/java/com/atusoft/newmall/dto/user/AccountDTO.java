@@ -3,10 +3,14 @@ package com.atusoft.newmall.dto.user;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.atusoft.infrastructure.BaseDTO;
+
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
-public class AccountDTO {
+@EqualsAndHashCode(callSuper=false)
+public class AccountDTO extends BaseDTO {
 	
 	String userId;
 

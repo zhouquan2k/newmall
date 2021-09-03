@@ -13,9 +13,27 @@ import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.user.AccountChangedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
+import com.atusoft.newmall.event.user.UserLoginEvent;
+import com.atusoft.util.Util;
+
+import io.vertx.core.Future;
 
 @Component("service")
 public class UserService extends BaseService {
+	
+	//TODO move to securityserver?
+	@CommandHandler
+	public void Login(String username,String password) {
+		//TODO authentication
+		Util.onSuccess(infrastructure.getEntity(User.class, "27"),user->{
+			UserLoginEvent event=new UserLoginEvent(user.getUser());
+			event.set_token("token_1");
+			this.infrastructure.publishEvent(event);
+			return Future.succeededFuture();
+		});
+		
+		
+	}
 	
 	@CommandHandler
 	public void SaveAccount(AccountDTO account) {

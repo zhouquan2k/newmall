@@ -19,6 +19,7 @@ public class UserLoginEvent extends BaseEvent {
 	public UserLoginEvent(UserDTO user) {
 		super(user);
 		this.user=user;
+		this.userId=user.getUserId();
 	}
 	/*
 	public Object getUserObject() {

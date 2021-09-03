@@ -135,7 +135,9 @@ class ServiceFramework implements MessageHandler {
 		//Method method=Util.getMethod(service.getClass(), command.getCommandName().substring(command.getCommandName().indexOf('.')+1), null);
 		Method method=this.methodMap.get("Command:"+command.getCommandName());
 		if (method==null) {
-			log.warn("invalid command:"+command.getCommandName());
+			String msg="invalid command:"+command.getCommandName();
+			log.warn(msg);
+			message.getContext().response(msg);
 			return;
 		}
 		Object[] params=new Object[method.getParameterCount()];
@@ -162,7 +164,7 @@ class ServiceFramework implements MessageHandler {
 					params[i]=new ContextImpl(command,this.securityUtil);
 				}
 				else {
-					if (command.getParams().containsKey(parameters[i].getName())) {
+					if (command.getParam(parameters[i].getName())!=null) {
 						params[i]=convertFromString(command.getParam(parameters[i].getName()),
 								parameters[i].getType());
 					}

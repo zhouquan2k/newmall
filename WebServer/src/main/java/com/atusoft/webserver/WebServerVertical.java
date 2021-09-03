@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.atusoft.framwork.ApiMessage;
+import com.atusoft.framwork.ApiResponseMessage;
 import com.atusoft.infrastructure.RestApi;
 import com.atusoft.infrastructure.RestApi.ApiEntry;
 import com.atusoft.messaging.MessageContext;
@@ -48,9 +49,11 @@ class DefaultEntry implements Handler<RoutingContext> {
 			 
 			 //TODO to json string
 			 HttpServerResponse response = routingContext.response();
+			 ApiResponseMessage r=(ApiResponseMessage)message.getContent();
 			 response
 			       .putHeader("Content-Type", "application/json")
-			       .end(""+((message.getContent()!=null)?message.getContent():""));
+			       .setStatusCode(r.getCode())
+			       .end(""+((r.getBody()!=null)?r.getBody():""));
 			   
 		 });
 	}

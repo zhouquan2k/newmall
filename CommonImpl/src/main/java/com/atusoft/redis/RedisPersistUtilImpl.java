@@ -28,6 +28,7 @@ public class RedisPersistUtilImpl implements PersistUtil {
 	public <T> Future<T> getEntity(Class<T> cls, String key) {
 		final String lKey=(cls!=null)?cls.getSimpleName()+":"+key:key;
 		return this.redisUtil.getRedis().get(lKey).map(response->{
+			if (response==null) return null;
 			return (T)PersistUtil.str2Obj(jsonUtil, response.toString(), cls);
 		});
 	}

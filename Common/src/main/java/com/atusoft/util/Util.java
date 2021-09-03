@@ -44,9 +44,9 @@ public class Util {
 	@SuppressWarnings("unchecked")
 	public static <T> T getFutureResult(CompositeFuture cf,Class<T> cls)  {
 		for (Object o:cf.list()) {
-			if (cls.isAssignableFrom(o.getClass())) return (T)o;
+			if (o!=null&&cls.isAssignableFrom(o.getClass())) return (T)o;
 		}
-		throw new RuntimeException("no result of type :"+cls.getName());
+		throw new RuntimeException("no result of type :"+cls.getName()+",or null");
 	}
 	
 	public static <T> Future<T> onSuccess(Future<T>f,Function<T,Future<T>> handler) {

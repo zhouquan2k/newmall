@@ -14,6 +14,7 @@ import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
 import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
+import com.atusoft.util.BusiException;
 import com.atusoft.util.Util;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -46,7 +47,8 @@ public class Order  extends BaseEntity {
 		Promise<?> pPriced=this.infrastructure.addPendingFuture("order:"+this.order.getOrderId()+":price");
 		Promise<?> pDeduction=this.infrastructure.addPendingFuture("order:"+this.order.getOrderId()+":deduction");
 		
-		Util.onSuccess(fUser,user->{
+		fUser=Util.onSuccess(fUser,user->{
+			if (user==null) throw new BusiException("Authorization","not logged in",null);
 			this.order.setUserId(user.getUserId());
 			this.order.setStatus(Status.Preview);
 			this.save(new OrderCreatedEvent(this.order),60*10);
@@ -54,7 +56,7 @@ public class Order  extends BaseEntity {
 		});
 		
 	
-		return CompositeFuture.all(pPriced.future(),  pDeduction.future()).map(r->{
+		return CompositeFuture.all(fUser,pPriced.future(),  pDeduction.future()).map(r->{
 		
 			//TODO do price calculation
 			//计算抵扣，活动不能抵扣
