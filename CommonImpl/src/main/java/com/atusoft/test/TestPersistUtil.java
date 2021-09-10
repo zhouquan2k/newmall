@@ -3,6 +3,7 @@ package com.atusoft.test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Vector;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +24,15 @@ public class TestPersistUtil implements PersistUtil {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Future<T> getEntity(Class<T> cls, String key) {
+	public <T> Future<Optional<T>> getEntity(Class<T> cls, String key) {
 		String str=this.entities.get(key);
-		if (str==null) return (Future<T>)Future.succeededFuture(null);
-		String className=str.substring(0,str.indexOf(':'));
-		String content=str.substring(str.indexOf(':')+1);
-		T ret=(cls==null)?(T)jsonUtil.fromJson(content,className):jsonUtil.fromJson(content, cls);
-		return (Future<T>)Future.succeededFuture(ret);
+		T ret=null;
+		if (str!=null) {
+			String className=str.substring(0,str.indexOf(':'));
+			String content=str.substring(str.indexOf(':')+1);
+			ret=(cls==null)?(T)jsonUtil.fromJson(content,className):jsonUtil.fromJson(content, cls);
+		}
+		return Future.succeededFuture(Optional.ofNullable(ret));
 	}
 
 	@Override

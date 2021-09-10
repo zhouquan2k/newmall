@@ -12,7 +12,9 @@ import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.PromoterLevel;
 import com.atusoft.newmall.dto.user.UserDTO;
 import com.atusoft.newmall.event.order.OrderCancelledEvent;
+import com.atusoft.newmall.event.order.OrderPaidEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
+import com.atusoft.newmall.event.order.ToOrderPaidEvent;
 import com.atusoft.newmall.event.user.UserLoginEvent;
 import com.atusoft.test.BaseTest;
 
@@ -50,14 +52,14 @@ class UserServiceApplicationTests extends BaseTest {
 		
 	}
 	
-	final String orderJson="{order:{orderId:\"order_1\",purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}],brokerageDeduction:{deduction:true,deducted:5},deductionPrice:5,userId:\"27\"},_token:\"token_1\"}";
+	final String orderJson="{order:{orderId:\"order_1\",cart:{purchaseItems:[{skuId:\"sku_1\",shelfId:\"shelf_1\",count:2}]},deductionOptions:{brokerageDeduction:{deduction:true,deducted:5}},deductionPrice:5,payPrice:10,totalPrice:15,payMethod:\"Balance\",userId:\"27\"},_token:\"token_1\"}";
 
 	
 	@Test
 	@Order(1)
 	public void testLogin() {
 		
-		String json="{userId:\"27\",user:{userId:\"27\",username:\"zhouquan\",promoterLevel:\"Silver\"},_token:\"token_1\"}";
+		String json="{userId:\"27\",user:{userId:\"27\",username:\"zhouquan\",promoterLevel:\"Silver\"},payMethod:\"Balance\",_token:\"token_1\"}";
 		System.out.println(json);
 		UserLoginEvent event=this.jsonUtil.fromJson(json,UserLoginEvent.class);
 		userService.onUserLoginEvent(event);
@@ -68,14 +70,24 @@ class UserServiceApplicationTests extends BaseTest {
 	public void testBrokerageDeduction() {		
 		OrderSubmitedEvent event=this.jsonUtil.fromJson(orderJson,OrderSubmitedEvent.class);
 		submitEventId=event.getEventId();
-		String userId=infrastructure.getCurrentUser(event).result().getUserId();
-		User user=infrastructure.getEntity(User.class,userId).result();
+		String userId=infrastructure.getCurrentUser(event).result().orElseThrow().getUserId();
+		User user=infrastructure.getEntity(User.class,userId).result().orElseThrow();
 		//BigDecimal initBalance=user.getAccount().getBalance();
 		BigDecimal initBrokerageBalance=user.getAccount().getBrokerage();
+		BigDecimal initBalance=user.getAccount().getBalance();
+		
 		this.userService.onOrderSubmitedEvent(event);
-		User user2=infrastructure.getEntity(User.class,userId).result();
+		
+		ToOrderPaidEvent event2=infrastructure.assureEvent(ToOrderPaidEvent.class);
+		assertEquals(true,event2.isSuccess());
+		
+		User user2=infrastructure.getEntity(User.class,userId).result().orElseThrow();
 		assertEquals(initBrokerageBalance.subtract(event.getOrder().getDeductionPrice()),user2.getAccount().getBrokerage());
 		brokerageBalance=user2.getAccount().getBrokerage();
+		
+		assertEquals(initBalance.subtract(event.getOrder().getPayPrice()),user2.getAccount().getBalance());
+	
+		
 	}
 	
 	@Test
@@ -85,10 +97,26 @@ class UserServiceApplicationTests extends BaseTest {
 		OrderCancelledEvent event=this.jsonUtil.fromJson(json,OrderCancelledEvent.class);
 		event.setCauseEventId(submitEventId);
 		userService.onOrderCancelledEvent(event);
-		User user=infrastructure.getEntity(User.class,event.getOrder().getUserId()).result();
+		User user=infrastructure.getEntity(User.class,event.getOrder().getUserId()).result().orElseThrow();
 		assertEquals(brokerageBalance.add(event.getOrder().getDeductionPrice()),user.getAccount().getBrokerage());
 		infrastructure.dump();
 	}
+	
+	
+	/*
+	@Test
+	@Order(4)
+	public void testPaidOrder() {		
+		String json=orderJson;
+		OrderCancelledEvent event=this.jsonUtil.fromJson(json,OrderCancelledEvent.class);
+		event.setCauseEventId(submitEventId);
+		userService.onOrderCancelledEvent(event);
+		User user=infrastructure.getEntity(User.class,event.getOrder().getUserId()).result().orElseThrow();
+		assertEquals(brokerageBalance.add(event.getOrder().getDeductionPrice()),user.getAccount().getBrokerage());
+		infrastructure.dump();
+	}
+	*/
+	
 	
 
 }

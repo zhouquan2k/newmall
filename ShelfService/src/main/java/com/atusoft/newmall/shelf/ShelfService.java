@@ -10,10 +10,11 @@ import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
 import com.atusoft.infrastructure.Infrastructure;
 import com.atusoft.newmall.BaseService;
+import com.atusoft.newmall.dto.order.CartDTO;
 import com.atusoft.newmall.dto.order.OrderDTO;
-import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
+import com.atusoft.newmall.dto.order.PurchaseItem;
+import com.atusoft.newmall.event.order.OrderPreviewEvent;
 import com.atusoft.newmall.event.order.OrderCancelledEvent;
-import com.atusoft.newmall.event.order.OrderCreatedEvent;
 import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.shelf.OrderPricedEvent;
@@ -32,14 +33,15 @@ public class ShelfService extends BaseService {
 	
 	@SuppressWarnings("rawtypes")
 	@EventHandler
-	public void onOrderCreatedEvent(OrderCreatedEvent event) {
+	public void onOrderPreviewEvent(OrderPreviewEvent event) {
 		this.infrastructure.getCurrentUser(event).onSuccess(user->{
 			final List<PurchaseItem> allItems=new ArrayList<PurchaseItem>();
 			OrderDTO order=event.getOrder();
+			CartDTO cart=order.getCart();
 			List<Future> all=new ArrayList<Future>();
-			for (PurchaseItem item:event.getOrder().getPurchaseItems()) {
+			for (PurchaseItem item:cart.getPurchaseItems()) {
 				Future<Void> f=this.infrastructure.getEntity(Shelf.class,item.getShelfId()).compose(shelf->{
-					PurchaseItem pItem=shelf.getPrice(item,user);
+					PurchaseItem pItem=shelf.orElseThrow().preview(item,user.orElseThrow());
 					allItems.add(pItem);
 					return Future.succeededFuture();
 				});
@@ -47,8 +49,10 @@ public class ShelfService extends BaseService {
 			}
 			
 			CompositeFuture.all(all).onSuccess(a->{
-				order.setPurchaseItems(allItems);
+				cart.setPurchaseItems(allItems);
 				this.infrastructure.publishEvent(new OrderPricedEvent(order));
+			}).onFailure(e->{
+				e.printStackTrace();
 			});
 			
 		});
@@ -61,7 +65,7 @@ public class ShelfService extends BaseService {
 			String shelfId=e.getSourceId();
 			this.infrastructure.getEntity(Shelf.class,shelfId).onSuccess(shelf->{
 				if (e instanceof ShelfItemChangedEvent) //ignore OrderExceptionEvent
-					shelf.cancelOrder((ShelfItemChangedEvent)e);
+					shelf.orElseThrow().cancelOrder((ShelfItemChangedEvent)e);
 			});
 		});
 		
@@ -79,9 +83,9 @@ public class ShelfService extends BaseService {
 	public void onOrderSubmitedEvent(OrderSubmitedEvent event) {
 		OrderDTO order=event.getOrder();
 		List<Future> all=new ArrayList<Future>();
-		for (PurchaseItem item:event.getOrder().getPurchaseItems()) {
+		for (PurchaseItem item:event.getOrder().getCart().getPurchaseItems()) {
 			Future<?> f=this.infrastructure.getEntity(Shelf.class,item.getShelfId()).map(shelf->{
-				return shelf.purchase(event,item);
+				return shelf.orElseThrow().purchase(event,item);
 			});
 			all.add(f);
 		

@@ -2,20 +2,27 @@ package com.atusoft.newmall.dto.order;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import com.atusoft.infrastructure.BaseDTO;
-import com.atusoft.newmall.dto.user.CouponDTO;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 
 //using base class or as another param
-//TODO OrderEx: for output
+//TODO REFACTOR  BaseDTO contains _token
+
 
 @Data
 @EqualsAndHashCode(callSuper=false)
-public class OrderDTO extends BaseDTO {
+@Builder(toBuilder=true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class OrderDTO extends BaseDTO 
+{
 
 	String orderId; // for output
 	//User related
@@ -35,22 +42,8 @@ public class OrderDTO extends BaseDTO {
 	
 	//product related
 	
-	List<PurchaseItem> purchaseItems;
-		
-	@Data
-	public static class PurchaseItem {
-		String productId;
-		String skuId;
-		String shelfId;
-		int count;
-		
-		// for output
-		String warehouseId;
-		BigDecimal unitPrice;	
-	}
+	CartDTO cart;
 	
-	String cartId;
-
 		
 	//Pay related
 	public enum PayMethod {
@@ -60,17 +53,9 @@ public class OrderDTO extends BaseDTO {
 	
 	PayMethod payMethod;
 	
+	@Builder.Default
+	DeductionOptions deductionOptions=new DeductionOptions();
 	
-	@Data
-	@EqualsAndHashCode(callSuper=false)
-	public static class CouponDeduction extends Deduction {
-		String couponId;//null means no deduction
-		List<CouponDTO> coupons;
-	}
-	
-	Deduction integralDeduction;
-	Deduction brokerageDeduction;
-	CouponDeduction couponDeduction;
 		
 	//deliver related
 	

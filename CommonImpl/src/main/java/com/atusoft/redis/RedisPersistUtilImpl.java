@@ -2,6 +2,7 @@ package com.atusoft.redis;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
@@ -25,11 +26,13 @@ public class RedisPersistUtilImpl implements PersistUtil {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <T> Future<T> getEntity(Class<T> cls, String key) {
+	public <T> Future<Optional<T>> getEntity(Class<T> cls, String key) {
 		final String lKey=(cls!=null)?cls.getSimpleName()+":"+key:key;
 		return this.redisUtil.getRedis().get(lKey).map(response->{
-			if (response==null) return null;
-			return (T)PersistUtil.str2Obj(jsonUtil, response.toString(), cls);
+			T ret=null;
+			if (response!=null)
+				ret=(T)PersistUtil.str2Obj(jsonUtil, response.toString(), cls);
+			return Optional.ofNullable(ret);
 		});
 	}
 

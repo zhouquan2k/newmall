@@ -3,7 +3,7 @@ package com.atusoft.newmall.shelf.domain;
 import com.atusoft.infrastructure.BaseEntity;
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.infrastructure.User;
-import com.atusoft.newmall.dto.order.OrderDTO.PurchaseItem;
+import com.atusoft.newmall.dto.order.PurchaseItem;
 import com.atusoft.newmall.dto.user.UserDTO;
 import com.atusoft.newmall.event.shelf.ShelfItemChangedEvent;
 import com.atusoft.newmall.shelf.ShelfDTO;
@@ -31,10 +31,14 @@ public class Shelf extends BaseEntity {
 		return this.shelf;
 	}
 	
-	public PurchaseItem getPrice(PurchaseItem item,User user) {
-		//TODO check shelf stock
+	//make sure if shelf stock is enough , and give price
+	public PurchaseItem preview(PurchaseItem item,User user) {
 		UserDTO userDto=(UserDTO)user.getUserObject();
+		assert(userDto!=null);
 		ShelfItem shelfItem=this.shelf.getSku2Shelf().get(item.getSkuId());
+		//if (item.getCount()>shelfItem.getStock())
+		item.setStock(shelfItem.getStock());
+			//throw new BusiException("OutOfStock","OutOfStock:"+shelfItem.getSkuId(),"Shelf");
 		item.setUnitPrice(shelfItem.getPromoterPrices().get(userDto.getPromoterLevel()));
 		return item;
 	}

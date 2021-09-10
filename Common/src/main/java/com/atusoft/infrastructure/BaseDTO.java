@@ -2,6 +2,7 @@ package com.atusoft.infrastructure;
 
 import lombok.Data;
 
+//TODO refactor?
 @Data
 public class BaseDTO {
 	

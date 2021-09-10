@@ -3,6 +3,7 @@ package com.atusoft.infrastructure.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -53,28 +54,28 @@ public class InfrastructureImpl implements Infrastructure  {
 	
 	@PostConstruct
 	public void init() {
-		
+		BaseEntity.setInfrastructure(this);
 	}
 	
 	
 	@Override
-	public Future<User> getCurrentUser(BaseDTO dto) {
+	public Future<Optional<User>> getCurrentUser(BaseDTO dto) {
 		return this.securityUtil.getCurrentUser(dto.get_token());
 	}
 	
 	@Override
-	public Future<User> getCurrentUser(BaseEvent event) {
+	public Future<Optional<User>> getCurrentUser(BaseEvent event) {
 		return this.securityUtil.getCurrentUser(event.get_token());
 	}
 	
 	@Override
-	public <T> Future<T> getEntity(Class<T> cls, String key) {
+	public <T> Future<Optional<T>> getEntity(Class<T> cls, String key) {
 		
-		return this.persistUtil.getEntity(cls, key).compose(t->{
-			if (t!=null&&BaseEntity.class.isAssignableFrom(cls))
-				((BaseEntity)t).setInfrastructure(this);
-			return Future.succeededFuture(t);		
-		});
+		return this.persistUtil.getEntity(cls, key); //.compose(t->{
+			//if (t!=null&&BaseEntity.class.isAssignableFrom(cls))
+			//	((BaseEntity)t).setInfrastructure(this);
+			//return Future.succeededFuture(t);		
+		//});
 	}
 	
 
@@ -82,7 +83,7 @@ public class InfrastructureImpl implements Infrastructure  {
 	public <T extends BaseEntity> T newEntity(Class<T> cls, BaseDTO dto) {
 		try {
 			T ret=cls.getConstructor(dto.getClass()).newInstance(dto);
-			ret.setInfrastructure(this);
+			//ret.setInfrastructure(this);
 			return ret;
 		}
 		catch (Exception e) {
@@ -93,11 +94,11 @@ public class InfrastructureImpl implements Infrastructure  {
 
 	@Override
 	public <T> Future<T> persistEntity(String key,T entity, int timeoutInSeconds) {
-		final Infrastructure that=this;
-		return this.persistUtil.persistEntity(key,entity,timeoutInSeconds).map(ret->{
-			if (ret instanceof BaseEntity) ((BaseEntity)ret).setInfrastructure(that);
-			return ret;
-		});
+		//final Infrastructure that=this;
+		return this.persistUtil.persistEntity(key,entity,timeoutInSeconds); //map(ret->{
+		//	if (ret instanceof BaseEntity) ((BaseEntity)ret).setInfrastructure(that);
+		//	return ret;
+		//});
 	}
 
 	@Override

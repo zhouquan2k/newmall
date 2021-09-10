@@ -49,16 +49,13 @@ public class Util {
 		throw new RuntimeException("no result of type :"+cls.getName()+",or null");
 	}
 	
-	public static <T> Future<T> onSuccess(Future<T>f,Function<T,Future<T>> handler) {
+	public static <T,U> Future<U> onSuccess(Future<T>f,Function<T,Future<U>> handler) {
 		f.onFailure(exception->{
 			log.error(getErrStack(exception,0,0));
 		});
 		return f.compose(handler);
 	}
 	
-	public static void mustNotNull(Object obj) {
-		if (obj==null) throw new RuntimeException("NullCheck");
-	}
 	
 	
 	public static String getErrStack(Throwable exception ,int maxLine,int maxLength) //throws Throwable

@@ -14,6 +14,8 @@ import com.atusoft.messaging.MessageContext;
 import com.atusoft.redis.RedisUtil;
 import com.atusoft.util.JsonUtil;
 
+import io.vertx.core.Future;
+
 
 
 @SpringBootTest
@@ -41,6 +43,17 @@ public class BaseTest {
 	@PostConstruct
 	void _init() {
 		if (infrastructure==null) infrastructure=_infrastructure;
+	}
+	
+	protected <T> T getResult(Future<T> f) throws Throwable {
+		int count=0;
+		while (!f.isComplete()) {
+			Thread.sleep(50);
+			count++;
+			if (count>100) throw new RuntimeException("wait for result timeout");
+		}
+		if (f.failed())  throw f.cause();
+		return f.result();
 	}
 }
 	

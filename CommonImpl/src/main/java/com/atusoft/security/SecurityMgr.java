@@ -1,5 +1,7 @@
 package com.atusoft.security;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.atusoft.framwork.PersistUtil;
@@ -24,12 +26,12 @@ public class SecurityMgr implements SecurityUtil {
 	}
 	
 	@Override
-	public Future<User> getCurrentUser(String token) {
+	public Future<Optional<User>> getCurrentUser(String token) {
 		String key="user_token:"+token;
 		return this.persistUtil.getEntity(null,key).map( r->{
-			UserObject uo=(UserObject)r;
-			return uo==null?null:uo.getUser();
-			//TODO
+			User ret=null;
+			if (r.isPresent()) ret=((UserObject)r.get()).getUser();
+			return Optional.ofNullable(ret);
 		});
 	}
 }

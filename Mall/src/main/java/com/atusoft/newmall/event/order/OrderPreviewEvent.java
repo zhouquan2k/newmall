@@ -1,4 +1,3 @@
-
 package com.atusoft.newmall.event.order;
 
 import com.atusoft.infrastructure.BaseEvent;
@@ -9,15 +8,15 @@ import lombok.ToString;
 
 @Getter
 @ToString(callSuper=true)
-@Deprecated
-public class OrderCreatedEvent extends BaseEvent {
+public class OrderPreviewEvent extends BaseEvent {
+
 	OrderDTO order;
 	
-	protected OrderCreatedEvent() {
+	protected OrderPreviewEvent() {
+		
 	}
-	public OrderCreatedEvent(OrderDTO order) {
-		super(order);
+	
+	public OrderPreviewEvent(OrderDTO order) {
 		this.order=order;
 	}
-
 }

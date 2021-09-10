@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Vector;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.atusoft.framwork.ApiMessage;
 import com.atusoft.infrastructure.BaseDTO;
@@ -24,18 +24,22 @@ import com.atusoft.infrastructure.User;
 import com.atusoft.messaging.Message;
 import com.atusoft.messaging.MessageContext;
 import com.atusoft.messaging.MessageHandler;
+import com.atusoft.util.BusiException;
 import com.atusoft.util.JsonUtil;
 import com.atusoft.util.SecurityUtil;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class ServiceFramework implements MessageHandler {
 	
+	@Autowired
+	Vertx vertx;
 	
-	@Resource(name="service") 
-	Object service;
+	@Resource(name="allServices")
+	Map<String,Object> allServices;
 
 	@Autowired
 	MessageContext context;
@@ -43,11 +47,19 @@ class ServiceFramework implements MessageHandler {
 	@Autowired
 	JsonUtil jsonUtil;
 	
-	@Value("${app.service-name}")
-	String serviceName;
 	
 	@Autowired 
 	SecurityUtil securityUtil;
+	
+	
+	static class Invokation {
+		Object service;
+		Method method;
+		Invokation(Object service,Method method){
+			this.service=service;
+			this.method=method;
+		}
+	}
 	
 	
 	class ContextImpl implements Context {
@@ -62,16 +74,24 @@ class ServiceFramework implements MessageHandler {
 		public User getCurrentUser() {
 			
 			String token=command.getParam("_token");
-			return this.securityUtil.getCurrentUser(token).result();
+			return this.securityUtil.getCurrentUser(token).result().orElseThrow();
 		}
 		
 	}
 	
-	Map<String,Method> methodMap=new HashMap<String,Method>();
+	Map<String,Invokation> methodMap=new HashMap<String,Invokation>();
+	Map<String,List<Invokation>> eventMethodMap=new HashMap<String,List<Invokation>>();
 	
 	@PostConstruct
 	public void init() throws InterruptedException { 
 		
+		//init all services
+		this.allServices.forEach((key,value)->{
+			this.initService(key, value);
+		});
+	}
+
+	private void initService(String serviceName,Object service) {
 		//construt a method map
 		List<String> topics=new ArrayList<String>();
 		context.setHandler(new String[]{"Command\\."+serviceName+"\\..*"},this);
@@ -80,20 +100,26 @@ class ServiceFramework implements MessageHandler {
 			CommandHandler c=method.getAnnotation(CommandHandler.class);
 			if (c!=null) {
 				String name=c.value().isBlank()?method.getName():c.value();
-				methodMap.put("Command:"+this.serviceName+"."+name,method);
+				methodMap.put("Command:"+serviceName+"."+name,new Invokation(service,method));
 			}
 			EventHandler e=method.getAnnotation(EventHandler.class);
 			if (e!=null) {
 				Class <?> pc=method.getParameterTypes()[0];
 				Class<?> ec=(e.value()==BaseEvent.class)?pc:e.value();
 				topics.add("Event."+ec.getName());
-				methodMap.put("Event:"+ec.getName(), method);
+				List<Invokation> l=this.eventMethodMap.get(ec.getName());
+				if (l==null) {
+					l=new Vector<Invokation>();
+					this.eventMethodMap.put(ec.getName(), l);
+				}
+				l.add(new Invokation(service,method));
 			}
 		}
 		
-		context.setEventHandler(this.serviceName,topics.toArray(new String[topics.size()]), this);
-	}
+		context.setEventHandler(serviceName,topics.toArray(new String[topics.size()]), this);
 
+	}
+	
 	@Override
 	public void handle(Message message) {
 		// TODO Auto-generated method stub
@@ -117,35 +143,49 @@ class ServiceFramework implements MessageHandler {
 	
 	private void handleEvent(Message message) {
 		BaseEvent event=(BaseEvent)message.getContent();
-		Method method=this.methodMap.get("Event:"+event.getClass().getName());
-		Object[] params=new Object[1];
-		params[0]=event;
-		try {
-			log.debug("processing event:"+event);
-			method.invoke(service, params);
+		List<Invokation> methods=this.eventMethodMap.get(event.getClass().getName());
+		if (methods==null) {
+			log.warn("invalid event: "+event.getClass().getName());
+			return;
 		}
-		catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		}	
+		methods.stream().forEach(inv->{
+			this.vertx.executeBlocking(p->{
+				Object[] params=new Object[1];
+				params[0]=event;
+				log.debug("-- // processing event:"+event);
+				try {
+					@SuppressWarnings("unchecked")
+					Future<Object> fut=(Future<Object>)inv.method.invoke(inv.service, params);
+					if (fut!=null) fut.onFailure(e->{
+						e.printStackTrace();
+					}).onComplete(r->{
+						log.debug("-- \\\\processed event:"+event);
+					});
+				}
+				catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					e.printStackTrace();
+				}	
+			});
+		});
 	}
 	
 	
 	private void handleCommand(Message message) {
 		ApiMessage command = (ApiMessage)message.getContent();
 		//Method method=Util.getMethod(service.getClass(), command.getCommandName().substring(command.getCommandName().indexOf('.')+1), null);
-		Method method=this.methodMap.get("Command:"+command.getCommandName());
-		if (method==null) {
+		Invokation inv=this.methodMap.get("Command:"+command.getCommandName());
+		if (inv==null) {
 			String msg="invalid command:"+command.getCommandName();
 			log.warn(msg);
-			message.getContext().response(msg);
+			message.getContext().response(new BusiException("InvailidCommand",msg,"ServiceFrame"));
 			return;
 		}
-		Object[] params=new Object[method.getParameterCount()];
-		if (method.getParameterCount()>0) {
-			Class<?>[] paramTypes=method.getParameterTypes();
-			Parameter[] parameters=method.getParameters();
+		Object[] params=new Object[inv.method.getParameterCount()];
+		if (inv.method.getParameterCount()>0) {
+			Class<?>[] paramTypes=inv.method.getParameterTypes();
+			Parameter[] parameters=inv.method.getParameters();
 			for (int i=0;i<paramTypes.length;i++) {
-				Class<?> c=method.getParameterTypes()[i];
+				Class<?> c=inv.method.getParameterTypes()[i];
 				if (BaseDTO.class.isAssignableFrom(c)) {
 					try {
 						BaseDTO dto=(BaseDTO)jsonUtil.fromJson(command.getBody(),c);
@@ -174,7 +214,7 @@ class ServiceFramework implements MessageHandler {
 		
 		try {
 			log.debug("// processing command:"+command);
-			Object ret=method.invoke(service, params);
+			Object ret=inv.method.invoke(inv.service, params);
 			if (ret instanceof Future) {
 				((Future<?>) ret).onSuccess( r-> {
 					log.debug("\\\\ command response async:"+r);
@@ -197,12 +237,14 @@ class ServiceFramework implements MessageHandler {
 		
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private <T> T convertFromString(String src,Class<T> cls) {
 		if (cls.isPrimitive()) {
 			if (cls.equals(java.lang.Integer.TYPE))
 				return (T)(Object)Integer.parseInt(src);
 		}
+		else if (cls.isEnum())
+			return (T)Enum.valueOf((Class<Enum>) cls, src);
 		else if (cls.equals(String.class))
 			return (T)src;
 		return null;

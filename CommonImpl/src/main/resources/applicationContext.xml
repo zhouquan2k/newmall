@@ -16,7 +16,8 @@
 <bean class="com.atusoft.redis.RedisPersistUtilImpl"/>
 <bean class="com.atusoft.redis.RedisUtil"/>
 <bean class="com.atusoft.json.JsonUtil"/>
-<bean class="com.atusoft.security.SecurityMgr"/>
+<!-- bean class="com.atusoft.security.SecurityMgr"/-->
+<bean class="com.atusoft.newmall.SecurityMgr4Test"/>
 <bean class="io.vertx.core.Vertx" factory-method="vertx"/>
 
 

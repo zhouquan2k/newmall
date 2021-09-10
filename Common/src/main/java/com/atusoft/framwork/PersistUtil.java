@@ -1,6 +1,7 @@
 package com.atusoft.framwork;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.atusoft.infrastructure.BaseEvent;
 import com.atusoft.util.JsonUtil;
@@ -8,7 +9,7 @@ import com.atusoft.util.JsonUtil;
 import io.vertx.core.Future;
 
 public interface PersistUtil {
-	<T> Future<T> getEntity(Class<T> cls,String key);  //TODO  cache
+	<T> Future<Optional<T>> getEntity(Class<T> cls,String key);  //TODO  cache
 	<T> Future<T> persistEntity(String key,T entity,int timeoutInSeconds); //timeoutInSeconds<=0 means forever
 
 	void persistEvent(String key,BaseEvent event);

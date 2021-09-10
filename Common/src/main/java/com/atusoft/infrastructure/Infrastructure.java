@@ -1,6 +1,7 @@
 package com.atusoft.infrastructure;
 
 import java.util.List;
+import java.util.Optional;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -13,10 +14,10 @@ public interface Infrastructure {
 	//<T> T newEntity(Class<T> cls,BaseDTO dto);
 	<T extends BaseEntity> T newEntity(Class<T> cls,BaseDTO dto);
 	//<T> Future<T> getEntity(Class<T> cls,String key);  //TODO  cache
-	<T> Future<T> getEntity(Class<T> cls,String key);  //TODO  cache
+	<T> Future<Optional<T>> getEntity(Class<T> cls,String key);  //TODO  cache
 	<T> Future<T> persistEntity(String key,T entity,int timeoutInSeconds); //timeoutInSeconds<=0 means forever
-	Future<User> getCurrentUser(BaseDTO dto);
-	Future<User> getCurrentUser(BaseEvent event);
+	Future<Optional<User>> getCurrentUser(BaseDTO dto);
+	Future<Optional<User>> getCurrentUser(BaseEvent event);
 	
 	Future<List<BaseEvent>> getEventsByCause(String causeEventId);
 	

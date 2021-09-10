@@ -32,10 +32,10 @@ public class OrderExceptionEvent extends BaseEvent{
 		this.description=description;
 	}
 	
-	public OrderExceptionEvent(BaseEvent originEvent,String orderId,BusiException e) {
+	public OrderExceptionEvent(BaseEvent originEvent,String orderId,Throwable e) {
 		super(originEvent);
 		this.orderId=orderId;
-		this.cause=Cause.valueOf(e.getBusiCode());
+		if (e instanceof BusiException) this.cause=Cause.valueOf(((BusiException)e).getBusiCode());
 		this.description=e.getMessage();
 		this.exception=e;
 	}

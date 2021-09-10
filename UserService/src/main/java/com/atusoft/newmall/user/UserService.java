@@ -1,19 +1,23 @@
 package com.atusoft.newmall.user;
 
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Component;
 
 import com.atusoft.infrastructure.CommandHandler;
 import com.atusoft.infrastructure.EventHandler;
 import com.atusoft.newmall.BaseService;
-import com.atusoft.newmall.dto.order.OrderDTO;
+import com.atusoft.newmall.dto.order.OrderDTO.PayMethod;
 import com.atusoft.newmall.dto.user.AccountDTO;
 import com.atusoft.newmall.dto.user.UserDTO;
+import com.atusoft.newmall.event.order.OrderPreviewEvent;
 import com.atusoft.newmall.event.order.OrderCancelledEvent;
-import com.atusoft.newmall.event.order.OrderCreatedEvent;
+import com.atusoft.newmall.event.order.OrderExceptionEvent;
 import com.atusoft.newmall.event.order.OrderSubmitedEvent;
 import com.atusoft.newmall.event.user.AccountChangedEvent;
-import com.atusoft.newmall.event.user.OrderDeductionBalancedEvent;
+import com.atusoft.newmall.event.user.DeductionBalancedEvent;
 import com.atusoft.newmall.event.user.UserLoginEvent;
+import com.atusoft.util.BusiException;
 import com.atusoft.util.Util;
 
 import io.vertx.core.Future;
@@ -25,8 +29,10 @@ public class UserService extends BaseService {
 	@CommandHandler
 	public Future<?> Login(String username,String password) {
 		//TODO authentication
-		return Util.onSuccess(infrastructure.getEntity(User.class, "27"),user->{
-			UserLoginEvent event=new UserLoginEvent(user.getUser());
+		String userId="27";
+		return Util.onSuccess(infrastructure.getEntity(User.class,userId ),user->{
+			if (user==null) throw new BusiException("UserNotExist","user not exist:"+userId,"User");
+			UserLoginEvent event=new UserLoginEvent(user.orElseThrow().getUser());
 			event.set_token("token_1");
 			this.infrastructure.publishEvent(event);
 			return Future.succeededFuture();
@@ -37,7 +43,7 @@ public class UserService extends BaseService {
 	@CommandHandler
 	public Future<?> SaveAccount(AccountDTO account) {
 		return Util.onSuccess(this.infrastructure.getEntity(User.class,account.getUserId()),user->{
-			user.saveAccount(account);
+			user.orElseThrow().saveAccount(account);
 			return Future.succeededFuture();
 		});
 	}
@@ -50,23 +56,14 @@ public class UserService extends BaseService {
 	}
 	
 	@EventHandler
-	public void onOrderCreatedEvent(OrderCreatedEvent event) {
+	public void onOrderPreviewEvent(OrderPreviewEvent event) {
 		//get balance info 
 		//get brokerage info
-		final OrderDTO order=event.getOrder();
 		this.infrastructure.getCurrentUser(event).onSuccess(user->{
 			
-			this.infrastructure.getEntity(User.class,user.getUserId()).onSuccess(eUser->{
-				AccountDTO account=eUser.getAccount();
-				order.setBalance(account.getBalance());
-				if (order.getBrokerageDeduction()!=null) 
-					order.getBrokerageDeduction().setBalance(account.getBrokerage());
-				if (order.getIntegralDeduction()!=null) 
-					order.getIntegralDeduction().setBalance(account.getIntegral());
-				if (order.getCouponDeduction()!=null)
-					order.getCouponDeduction().setCoupons(account.getCoupons());
-
-				this.infrastructure.publishEvent(new OrderDeductionBalancedEvent(order));
+			this.infrastructure.getEntity(User.class,user.orElseThrow().getUserId()).onSuccess(eUser->{
+				AccountDTO account=eUser.orElseThrow().getAccount();
+				this.infrastructure.publishEvent(new DeductionBalancedEvent(event.getOrder().getOrderId(),account));
 			});
 		});
 	}
@@ -74,9 +71,15 @@ public class UserService extends BaseService {
 	@EventHandler
 	public void onOrderSubmitedEvent(OrderSubmitedEvent event) {
 		this.infrastructure.getCurrentUser(event).onSuccess(user->{
-			this.infrastructure.getEntity(User.class,user.getUserId()).onSuccess(eUser->{
-				if (event.getOrder().getBrokerageDeduction()!=null&&event.getOrder().getBrokerageDeduction().isDeduction())
-					eUser.deductBrokerage(event,event.getOrder().getBrokerageDeduction().getDeducted());
+			this.infrastructure.getEntity(User.class,user.orElseThrow().getUserId()).onSuccess(eUser->{
+				try
+				{
+					eUser.orElseThrow().onOrderSubmit(event);
+				}
+				catch (Throwable e) {
+					e.printStackTrace();
+					infrastructure.publishEvent(new OrderExceptionEvent(event,event.getOrder().getOrderId(),e));
+				}
 			});
 		});
 	}
@@ -87,7 +90,7 @@ public class UserService extends BaseService {
 			String userId=e.getSourceId();
 			this.infrastructure.getEntity(User.class,userId).onSuccess(user->{
 				if (e instanceof AccountChangedEvent) //ignore OrderExceptionEvent
-					user.cancelOrder(event,(AccountChangedEvent)e);
+					user.orElseThrow().cancelOrder(event,(AccountChangedEvent)e);
 			});
 		});
 	}

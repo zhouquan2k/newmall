@@ -29,7 +29,10 @@ public class Infrastructure4Test extends InfrastructureImpl implements Infrastru
 	@SuppressWarnings("unchecked")
 	public <T extends BaseEvent> T assureEvent(Class<T> cls) {
 		Optional<BaseEvent> ret=events.stream().filter(event->cls.isAssignableFrom(event.getClass())).findAny();
-		return (T)ret.get();
+		T r=(T)ret.get();
+		if (r!=null) events.remove(r);
+		else throw new RuntimeException("event not found:"+cls.getName());
+		return r;
 	}
 	
 

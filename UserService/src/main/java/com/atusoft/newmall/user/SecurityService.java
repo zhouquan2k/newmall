@@ -14,7 +14,7 @@ public class SecurityService extends BaseService {
 	public void login(String username,String password) {
 		//TODO authentication
 		Util.onSuccess(infrastructure.getEntity(User.class, "27"),user->{
-			this.infrastructure.publishEvent(new UserLoginEvent(user.getUser()));
+			this.infrastructure.publishEvent(new UserLoginEvent(user.orElseThrow().getUser()));
 			return Future.succeededFuture();
 		});
 		

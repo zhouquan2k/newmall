@@ -6,6 +6,9 @@ import com.atusoft.newmall.dto.order.OrderDTO;
 import lombok.Getter;
 import lombok.ToString;
 
+
+//TODO REFACTOR: OrderEvent
+
 @Getter
 @ToString(callSuper=true)
 public class OrderCancelledEvent extends BaseEvent {
